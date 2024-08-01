@@ -124,12 +124,6 @@ public class SimAssistant : MonoBehaviour
 
     }
 
-    public void OnGameDescFormCancel()
-    {
-        _GameDescForm.gameObject.SetActive(false);
-    }
-
-
     public void OnDestopPanelResized(float desktopHeight)
     {
         var rectTransform = _AssistantDialogs.GetComponent<RectTransform>();

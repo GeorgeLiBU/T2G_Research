@@ -218,53 +218,61 @@ public class JsonParser
                 {
                     var elementType = field.FieldType.GetElementType();
                     JSONArray jsonArray = jsonObj[field.Name].AsArray;
-                    var fieldArr = Array.CreateInstance(elementType, jsonArray.Count);
-                    field.SetValue(obj, fieldArr);
-                    for(int i = 0; i < jsonArray.Count; ++i)
+                    if(jsonArray == null)
                     {
-                        if (elementType == typeof(string))
+                        field.SetValue(obj, null);
+                    }
+                    else
+                    {
+                        int arrLen = jsonArray.Count;
+                        var fieldArr = Array.CreateInstance(elementType, arrLen);
+                        field.SetValue(obj, fieldArr);
+                        for (int i = 0; i < arrLen; ++i)
                         {
-                            fieldArr.SetValue(jsonArray[i].Value, i);
-                        }
-                        else if(elementType.IsPrimitive)
-                        {
-                            if (elementType == typeof(float))
+                            if (elementType == typeof(string))
                             {
-                                fieldArr.SetValue(jsonArray[i].AsFloat, i);
+                                fieldArr.SetValue(jsonArray[i].Value, i);
                             }
-                            else if (elementType == typeof(double))
+                            else if (elementType.IsPrimitive)
                             {
-                                fieldArr.SetValue(jsonArray[i].AsDouble, i);
+                                if (elementType == typeof(float))
+                                {
+                                    fieldArr.SetValue(jsonArray[i].AsFloat, i);
+                                }
+                                else if (elementType == typeof(double))
+                                {
+                                    fieldArr.SetValue(jsonArray[i].AsDouble, i);
+                                }
+                                else if (elementType == typeof(int))
+                                {
+                                    fieldArr.SetValue(jsonArray[i].AsInt, i);
+                                }
+                                else if (elementType == typeof(long))
+                                {
+                                    fieldArr.SetValue(jsonArray[i].AsLong, i);
+                                }
+                                else if (elementType == typeof(ulong))
+                                {
+                                    fieldArr.SetValue(jsonArray[i].AsULong, i);
+                                }
+                                else if (elementType == typeof(bool))
+                                {
+                                    fieldArr.SetValue(jsonArray[i].AsBool, i);
+                                }
                             }
-                            else if (elementType == typeof(int))
+                            else if (elementType.IsClass)
                             {
-                                fieldArr.SetValue(jsonArray[i].AsInt, i);
-                            }
-                            else if (elementType == typeof(long))
-                            {
-                                fieldArr.SetValue(jsonArray[i].AsLong, i);
-                            }
-                            else if (elementType == typeof(ulong))
-                            {
-                                fieldArr.SetValue(jsonArray[i].AsULong, i);
-                            }
-                            else if (elementType == typeof(bool))
-                            {
-                                fieldArr.SetValue(jsonArray[i].AsBool, i);
-                            }
-                        }
-                        else if(elementType.IsClass)
-                        {
-                            var jsonElement = jsonArray[i].AsObject;
-                            if (jsonElement != null)
-                            {
-                                var elementObj = Activator.CreateInstance(elementType);
-                                DeseialializeObject(elementObj, jsonElement.AsObject);
-                                fieldArr.SetValue(elementObj, i);
-                            }
-                            else
-                            {
-                                fieldArr.SetValue(null, i);
+                                var jsonElement = jsonArray[i].AsObject;
+                                if (jsonElement != null)
+                                {
+                                    var elementObj = Activator.CreateInstance(elementType);
+                                    DeseialializeObject(elementObj, jsonElement.AsObject);
+                                    fieldArr.SetValue(elementObj, i);
+                                }
+                                else
+                                {
+                                    fieldArr.SetValue(null, i);
+                                }
                             }
                         }
                     }
