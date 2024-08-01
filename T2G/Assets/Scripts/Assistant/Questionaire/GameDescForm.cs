@@ -29,6 +29,7 @@ public class GameDescForm : MonoBehaviour
         _Version.text = GameDesc.VersionNumber.ToString();
         _MinorVersion.text = GameDesc.MinorVersionNumber.ToString();
         _Author.text = GameDesc.Author;
+        _Path.text = PlayerPrefs.GetString(Defs.k_ProjectPathname, string.Empty);
     }
 
     public void OnSelectPath()
@@ -49,4 +50,21 @@ public class GameDescForm : MonoBehaviour
         };
         _GameDescList.gameObject.SetActive(true);
     }
+
+    public void OnSave()
+    {
+        GameDesc.Name = _Name.text;
+        //...
+
+        JsonParser.SerializeAndSave(GameDesc);
+
+        //Hide the form
+        gameObject.SetActive(false);
+    }
+
+    public void OnCancel()
+    {
+        gameObject.SetActive(false);
+    }
+
 }

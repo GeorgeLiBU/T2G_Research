@@ -58,7 +58,7 @@ public class SimAssistant : MonoBehaviour
 
     public void ProcessPrompt(string prompt, Action<string> callBack)
     {
-        if(_AssistantDialogs.activeSelf)
+        if(_GameDescForm.gameObject.activeSelf)
         {
             callBack?.Invoke("Please complete current task before doing anything else!");
             return;
@@ -103,7 +103,6 @@ public class SimAssistant : MonoBehaviour
 
     void CollectGameProjectInformation(string responseMessage)
     {
-        _AssistantDialogs.SetActive(true);
         _GameDescForm.GameDesc = new GameDesc();
         _GameDescForm.gameObject.SetActive(true);
     }
@@ -125,23 +124,11 @@ public class SimAssistant : MonoBehaviour
 
     }
 
-
-
     public void OnGameDescFormCancel()
     {
         _GameDescForm.gameObject.SetActive(false);
-        _AssistantDialogs.SetActive(false);
     }
 
-    public void OnGameDescFormOk()
-    {
-        //Save it
-        JsonParser.SerializeAndSave(_GameDescForm.GameDesc);
-
-        //Hide the form
-        _GameDescForm.gameObject.SetActive(false);
-        _AssistantDialogs.SetActive(false);
-    }
 
     public void OnDestopPanelResized(float desktopHeight)
     {
