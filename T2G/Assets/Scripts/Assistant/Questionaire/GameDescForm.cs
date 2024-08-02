@@ -54,6 +54,10 @@ public class GameDescForm : MonoBehaviour
     public void OnSave()
     {
         GameDesc.Name = _Name.text;
+        GameDesc.VersionNumber = int.Parse(_Version.text);
+        GameDesc.MinorVersionNumber = int.Parse(_MinorVersion.text);
+        GameDesc.Author = _Author.text;
+
         //...
 
         JsonParser.SerializeAndSave(GameDesc);

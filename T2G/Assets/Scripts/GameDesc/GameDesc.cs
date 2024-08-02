@@ -13,8 +13,6 @@ public class GameDesc : System.Object
     public GameProfile GameProfile = new GameProfile();
     public GameProject Project = new GameProject();
     public string[] Scenes = { "Scene1", "Scene2" };
-    public int[] Ints = { 1, 2 };
-
     public Scene[] Spaces = { new Scene(), new Scene() };
 
     public GameDesc()
