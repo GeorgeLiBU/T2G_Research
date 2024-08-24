@@ -103,7 +103,6 @@ public class SimAssistant : MonoBehaviour
 
     void CollectGameProjectInformation(string responseMessage)
     {
-        _GameDescForm.GameDesc = new GameDesc();
         _GameDescForm.gameObject.SetActive(true);
     }
 

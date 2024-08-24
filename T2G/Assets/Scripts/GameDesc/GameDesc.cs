@@ -6,33 +6,37 @@ using T2G.UnityAdapter;
 
 public class GameDesc : System.Object
 {
-    public string Name = "My Game";
-    public int VersionNumber = 0;
-    public int MinorVersionNumber = 1;
-    public string Author;
-    public GameProfile GameProfile = new GameProfile();
-    public GameProject Project = new GameProject();
-    public string[] Scenes = { "Scene1", "Scene2" };
-    public Scene[] Spaces = { new Scene(), new Scene() };
+    public string Name;
+    public string Title;
+    public string Genre;
+    public string ArtStyle;
+    public int VersionNumber;
+    public int MinorVersionNumber;
+    public string Developer;
+    public GameProject Project;
+    public GameWorld[] GameWorlds;
 
     public GameDesc()
     {
-        Author = Settings.User;
+        Project = new GameProject();
+        GameWorlds = new GameWorld[1];
+        GameWorlds[0] = new GameWorld();
     }
-}
-
-public class GameProfile
-{
-    public string Title;
-    public string Genre;            //FPS, RTS, Action, ...
-    public string ArtStyle;         //Realistic, cartoony, toon, ...
 }
 
 public class GameProject
 {
     public string Engine;
     public string Path;
-    public string ProjectName;
-    public string Assets;
 }
 
+public class GameWorld
+{
+    public string Name;
+    public string Ground;
+    public string SunLight;
+    public string PlayerCharacter;
+    public string Camera;
+    public string GameGoal;
+    public string HUD;
+}
