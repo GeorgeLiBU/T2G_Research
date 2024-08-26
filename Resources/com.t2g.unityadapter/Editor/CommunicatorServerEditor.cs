@@ -6,6 +6,28 @@ using UnityEditor;
 
 namespace T2G.UnityAdapter
 {
+    [InitializeOnLoad]
+    public class LauchEditorStartUp
+    {
+        static readonly string k_Started = "SessionStartedKey";
+        static LauchEditorStartUp()
+        {
+            if (!SessionState.GetBool(k_Started, false))
+            {
+                EditorApplication.quitting += EditorApplication_quitting;
+
+                CommunicatorServerEditor.Dashboard();
+                CommunicatorServerEditor.InitializeOnLoad();
+                SessionState.SetBool(k_Started, true);
+            }
+        }
+
+        private static void EditorApplication_quitting()
+        {
+            CommunicatorServerEditor.Uninitialize();
+        }
+    }
+
     public class CommunicatorServerEditor : EditorWindow
     {
         static CommunicatorServer _server;
@@ -72,6 +94,14 @@ namespace T2G.UnityAdapter
             {
                 _text = string.Empty;
                 _server.StartServer();
+            }
+        }
+
+        public static void Uninitialize()
+        {
+            if(_server != null)
+            {
+                _server.StopServer();
             }
         }
 

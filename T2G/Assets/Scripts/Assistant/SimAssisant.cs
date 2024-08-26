@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Threading.Tasks;
 
 public class SimAssistant : MonoBehaviour
 {
@@ -13,25 +13,21 @@ public class SimAssistant : MonoBehaviour
     string[] _prompts = { 
         "hello",
         "hi",
-        "create new game",
-        "make new game",
-        "modify change game",
-        "generate game",
-        "delete gamedesc"
+        "create a new game",
+        "make a new game",
+        "generate game"
     };
 
     string[] _responses = {
         "Hi {user}, I am {assistant}, your game development assistant. What can I do for you?",
         "Hello {user}, I am {assistant} who will assist you to develop games. What can I do for you?",
-        "Okay! I need some initial information about the game, please fill up the Game Project Information form.",
-        "Okay, Which game description (GameDesc) do you want to change?",
-        "Okay, Which game description (GameDesc) do you want to use to generate the new game project?",
-        "Okay, Which game description (GameDesc) do you want to delete?",
+        "Okay! I need some initial information about the game, please fill up the Game Description form.",
+        "Generating the game ..."
     };
 
   
-    Dictionary<string, List<int>> _promptResponeMap = new Dictionary<string, List<int>>();
-    Dictionary<string, Action<string>> _responseActionMap = new Dictionary<string, Action<string>>();
+    Dictionary<string, List<int>> _promptResponseMap = new Dictionary<string, List<int>>();
+    Dictionary<string, Func<string, int>> _responseActionMap = new Dictionary<string, Func<string, int>>();
 
     List<string> _matchedPrompts = new List<string>();
 
@@ -42,28 +38,18 @@ public class SimAssistant : MonoBehaviour
     {
         _instance = this;
 
-        _promptResponeMap.Add(_prompts[0], new List<int>(new int[] { 0, 1 }));
-        _promptResponeMap.Add(_prompts[1], new List<int>(new int[] { 0, 1 }));
-        _promptResponeMap.Add(_prompts[2], new List<int>(new int[] { 2 }));
-        _promptResponeMap.Add(_prompts[3], new List<int>(new int[] { 2 }));
-        _promptResponeMap.Add(_prompts[4], new List<int>(new int[] { 3 }));
-        _promptResponeMap.Add(_prompts[5], new List<int>(new int[] { 4 }));
-        _promptResponeMap.Add(_prompts[6], new List<int>(new int[] { 5 }));
+        _promptResponseMap.Add(_prompts[0], new List<int>(new int[] { 0, 1 }));
+        _promptResponseMap.Add(_prompts[1], new List<int>(new int[] { 0, 1 }));
+        _promptResponseMap.Add(_prompts[2], new List<int>(new int[] { 2 }));
+        _promptResponseMap.Add(_prompts[3], new List<int>(new int[] { 2 }));
+        _promptResponseMap.Add(_prompts[4], new List<int>(new int[] { 3 }));
 
         _responseActionMap.Add(_responses[2], CollectGameProjectInformation);
-        _responseActionMap.Add(_responses[3], OpenGameDescForEditing);
-        _responseActionMap.Add(_responses[4], GenerateGameFromGameDesc);
-        _responseActionMap.Add(_responses[5], DeleteGameDesc);
+        _responseActionMap.Add(_responses[3], GenerateGameFromGameDesc);
     }
 
     public void ProcessPrompt(string prompt, Action<string> callBack)
     {
-        if(_GameDescForm.gameObject.activeSelf)
-        {
-            callBack?.Invoke("Please complete current task before doing anything else!");
-            return;
-        }
-
         string promptKey = string.Empty;
         string responseMessage = "Sorry, I don't understand what you mean! Could you provide more specific infromation?";
 
@@ -80,7 +66,7 @@ public class SimAssistant : MonoBehaviour
                 promptKey = _matchedPrompts[0];
             }
 
-            if (_promptResponeMap.TryGetValue(promptKey, out var responseOptions))
+            if (_promptResponseMap.TryGetValue(promptKey, out var responseOptions))
             {
                 count = responseOptions.Count;
                 if (count > 1)
@@ -92,35 +78,116 @@ public class SimAssistant : MonoBehaviour
                     responseMessage = _responses[responseOptions[0]];
                 }
 
-                if(_responseActionMap.TryGetValue(responseMessage, out var action))
+                if (_responseActionMap.TryGetValue(responseMessage, out var function))
                 {
-                    action?.Invoke(responseMessage);
+                    int result = (function?.Invoke(responseMessage)).Value;
+                    if (result > 0)
+                    {
+                        responseMessage = _responses[result];
+                    }
                 }
             }
         }
         callBack?.Invoke(responseMessage);
     }
 
-    void CollectGameProjectInformation(string responseMessage)
+
+    int CollectGameProjectInformation(string responseMessage)
     {
         _GameDescForm.gameObject.SetActive(true);
+        return 0;
     }
 
-    void OpenGameDescForEditing(string responseMessage)
+    async Task CreateProjectFromGameDesc(GameDesc gameDesc)
     {
-        //Choose 
+        bool completed = false;
+        string[] args = new string[1] { gameDesc.GetProjectPathName() };
+        CommandSystem.Instance.ExecuteCommand(
+            (succeeded, sender, message) => {
+                completed = true;
+            }
+            , "CreateProject"
+            , args
+            );
 
-        //Open
+        while (!completed)
+        {
+            await Task.Delay(100);
+        }
     }
 
-    void DeleteGameDesc(string responseMessage)
+    async Task InitProject(GameDesc gameDesc)
     {
-
+        bool completed = false;
+        string[] args = new string[1] { gameDesc.GetProjectPathName() };
+        CommandSystem.Instance.ExecuteCommand(
+            (succeeded, sender, message) =>
+            {
+                completed = true;
+            }
+            , "InitProject"
+            , args
+            );
+        while (!completed)
+        {
+            await Task.Delay(100);
+        }
     }
 
-    void GenerateGameFromGameDesc(string responseMessage)
-    {
 
+    async Task OpenProject(GameDesc gameDesc)
+    {
+        bool completed = false;
+        string[] args = new string[1] { gameDesc.GetProjectPathName() };
+        CommandSystem.Instance.ExecuteCommand(
+            (succeeded, sender, message) =>
+            {
+                completed = true;
+            }
+            , "OpenProject"
+            , args
+            );
+        while (!completed)
+        {
+            await Task.Delay(100);
+        }
+    }
+
+    async Task Connect()
+    {
+        bool completed = false;
+        CommandSystem.Instance.ExecuteCommand((succeeded, sender, message) => { completed = true; }, "Connect");
+        while (!completed)
+        {
+            await Task.Delay(100);
+        }
+    }
+
+    async void GenerateGameAsync(GameDesc gameDesc)
+    {
+        ConsoleController console = ConsoleController.Instance;
+        await CreateProjectFromGameDesc(gameDesc);
+        console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was created. initilaizing the project ...");
+        await InitProject(gameDesc);
+        console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was initialized, opening the project in ...");
+        await OpenProject(gameDesc);
+        console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was opened. Connecting ...");
+        await Connect();
+        console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was opened. Importing assets ...");
+    }
+
+    int GenerateGameFromGameDesc(string responseMessage)
+    {
+        if(!_GameDescForm.gameObject.activeSelf)
+        {
+            CollectGameProjectInformation(_responses[3]);
+            return 2;
+        }
+
+        var gameDesc = _GameDescForm.GetGameDesc();
+        GenerateGameAsync(gameDesc);
+
+        return 0;
     }
 
     public void OnDestopPanelResized(float desktopHeight)

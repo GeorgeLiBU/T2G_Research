@@ -2,6 +2,7 @@ using UnityEngine;
 using SimpleJSON;
 using System.Collections.Generic;
 using System;
+using System.IO;
 using T2G.UnityAdapter;
 
 public class GameDesc : System.Object
@@ -22,12 +23,18 @@ public class GameDesc : System.Object
         GameWorlds = new GameWorld[1];
         GameWorlds[0] = new GameWorld();
     }
+
+    public string GetProjectPathName()
+    {
+        return Path.Combine(Project.Path, Project.Name);
+    }
 }
 
 public class GameProject
 {
     public string Engine;
     public string Path;
+    public string Name;
 }
 
 public class GameWorld

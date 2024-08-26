@@ -74,9 +74,9 @@ public class CmdOpenProject : Command
 
         try
         {
-
             process.Start();
             process.WaitForExit();
+
         }
         catch (Exception e)
         {

@@ -16,7 +16,10 @@ public class GameDescList : MonoBehaviour
     {
         foreach (var gamedesc in _gameDescList)
         {
-            Destroy(gamedesc.gameObject);
+            if (gamedesc != null)
+            {
+                Destroy(gamedesc.gameObject);
+            }
         }
 
         var gameDescList = JsonParser.GetGameDescList();

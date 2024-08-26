@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using SFB;
 using T2G.UnityAdapter;
+using System.IO;
 
 public class GameDescForm : MonoBehaviour
 {
@@ -45,7 +46,9 @@ public class GameDescForm : MonoBehaviour
             _MinorVersion.text = "1";
             _Developer.text = Settings.User;
             _GameEngine.value = 0;
-            _Path.text = PlayerPrefs.GetString(Defs.k_ProjectPathname, string.Empty);
+            string prjPath = PlayerPrefs.GetString(Defs.k_ProjectPathname, string.Empty);
+            _Path.text = string.Empty; 
+            _ProjectName.text = Path.GetFileName(prjPath);
             _GameWorldName.text = "World1";
             _Ground.value = 0;
             _Sunlight.value = 0;
@@ -65,6 +68,7 @@ public class GameDescForm : MonoBehaviour
             _Developer.text = gameDesc.Developer;
             _GameEngine.value = _GameEngine.options.FindIndex(option => option.text.CompareTo(gameDesc.Project.Engine) == 0);
             _Path.text = gameDesc.Project.Path;
+            _ProjectName.text = gameDesc.Project.Name;
             _GameWorldName.text = gameDesc.GameWorlds[0].Name;
             _Ground.value = _Ground.options.FindIndex(option => option.text.CompareTo(gameDesc.GameWorlds[0].Ground) == 0);
             _Sunlight.value = _Sunlight.options.FindIndex(option => option.text.CompareTo(gameDesc.GameWorlds[0].SunLight) == 0);
@@ -94,7 +98,7 @@ public class GameDescForm : MonoBehaviour
         _GameDescList.gameObject.SetActive(true);
     }
 
-    public void OnSave()
+    public GameDesc GetGameDesc()
     {
         var gameDesc = new GameDesc();
 
@@ -107,6 +111,7 @@ public class GameDescForm : MonoBehaviour
         gameDesc.Developer = _Developer.text;
         gameDesc.Project.Engine = _GameEngine.options[_GameEngine.value].text;
         gameDesc.Project.Path = _Path.text;
+        gameDesc.Project.Name = _ProjectName.text;
         gameDesc.GameWorlds[0].Name = _GameWorldName.text;
         gameDesc.GameWorlds[0].Ground = _Ground.options[_Ground.value].text;
         gameDesc.GameWorlds[0].SunLight = _Sunlight.options[_Sunlight.value].text;
@@ -114,8 +119,12 @@ public class GameDescForm : MonoBehaviour
         gameDesc.GameWorlds[0].Camera = _Camera.options[_Camera.value].text;
         gameDesc.GameWorlds[0].GameGoal = _GameGoal.options[_GameGoal.value].text;
         gameDesc.GameWorlds[0].HUD = _HUD.options[_HUD.value].text;
+        return gameDesc;
+    }
 
-        JsonParser.SerializeAndSave(gameDesc);
+    public void OnSave()
+    {
+        JsonParser.SerializeAndSave(GetGameDesc());
     }
 
     public void OnCancel()
