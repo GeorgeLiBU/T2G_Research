@@ -207,14 +207,14 @@ public class ConsoleController : MonoBehaviour
         switch (sender)
         {
             case eSender.User:
-                senderPrompt = PlayerPrefs.GetString(Defs.k_UserName, "You");
+                senderPrompt = Settings.User;
                 if (string.IsNullOrEmpty(senderPrompt))
                 {
                     senderPrompt = "You";
                 }
                 break;
             case eSender.Assistant:
-                senderPrompt = PlayerPrefs.GetString(Defs.k_AssistantName, "Assistant");
+                senderPrompt = Settings.Assistant;
                 if (string.IsNullOrEmpty(senderPrompt))
                 {
                     senderPrompt = "Assistant";
@@ -366,11 +366,13 @@ public class ConsoleController : MonoBehaviour
 
     void HandleOnConnectedToServer()
     {
+        WriteConsoleMessage(eSender.Assistant, "Connected to the project!");
+
         MessageStruct msgData = new MessageStruct
         {
             Type = eMessageType.SettingsData,
             Message = Settings.ToJson(false)  
         };
-        CommunicatorClient.Instance.SendMessage(msgData);
+        CommunicatorClient.Instance.SendMessage(msgData);   //Send settings to the project
     }
 }

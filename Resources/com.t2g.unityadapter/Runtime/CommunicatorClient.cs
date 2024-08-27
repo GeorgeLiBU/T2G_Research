@@ -49,7 +49,7 @@ namespace T2G.UnityAdapter
             base.Dispose();
         }
 
-        public void StartClient()
+        public void StartClient(float timeoutScale = 1.0f)
         {
             if (ClientState != eClientState.Disconnected)
             {
@@ -68,7 +68,7 @@ namespace T2G.UnityAdapter
             {
                 endPoint = NetworkEndpoint.LoopbackIpv4.WithPort(Port);
             }
-            _connectTimer = k_connectTimeout;
+            _connectTimer = timeoutScale > 0.0f ? k_connectTimeout * timeoutScale : k_connectTimeout;
             _connections[0] = _networkDriver.Connect(endPoint);
             ClientState = eClientState.Connecting;
         }

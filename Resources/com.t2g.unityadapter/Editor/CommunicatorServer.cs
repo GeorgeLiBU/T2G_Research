@@ -19,6 +19,7 @@ namespace T2G.UnityAdapter
         public Action OnClientDisconnected;
         public Action BeforeShutdownServer;
         public Action AfterShutdownServer;
+        public Action<string> OnLogMessage;
 
         static CommunicatorServer _instance = null;
         public static CommunicatorServer Instance
@@ -172,7 +173,10 @@ namespace T2G.UnityAdapter
                         switch(receivedMessage.Type)
                         {
                             case eMessageType.SettingsData:
-                                 Settings.FromJson(receivedMessage.Message.ToString(), false);
+                                {
+                                    Settings.FromJson(receivedMessage.Message.ToString(), false);
+                                    CommunicatorServer.Instance.OnLogMessage?.Invoke("Received Resource Path: " + Settings.RecoursePath);
+                                }
                                 break;
                             default:
                                 comm.PoolReceivedMessage(receivedMessage);

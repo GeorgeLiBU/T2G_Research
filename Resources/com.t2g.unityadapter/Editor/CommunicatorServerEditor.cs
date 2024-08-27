@@ -81,6 +81,11 @@ namespace T2G.UnityAdapter
                 _text += "\n Sent> " + message;
             };
 
+            communicatorServer.OnLogMessage += (message) =>
+            {
+                _text += "\n Received> " + message;
+            };
+
             if (_server == null)
             {
                 _server = CommunicatorServer.Instance;

@@ -51,7 +51,7 @@ public class SimAssistant : MonoBehaviour
     public void ProcessPrompt(string prompt, Action<string> callBack)
     {
         string promptKey = string.Empty;
-        string responseMessage = "Sorry, I don't understand what you mean! Could you provide more specific infromation?";
+        string responseMessage = "Sorry, I don't understand what you mean!";
 
         _matchedPrompts.Clear();
         if(Utilities.FindTopMatches(prompt, _prompts, 3, 0.5f, ref _matchedPrompts))
@@ -156,7 +156,8 @@ public class SimAssistant : MonoBehaviour
     async Task Connect()
     {
         bool completed = false;
-        CommandSystem.Instance.ExecuteCommand((succeeded, sender, message) => { completed = true; }, "Connect");
+        string[] args = new string[1] { "200" };
+        CommandSystem.Instance.ExecuteCommand((succeeded, sender, message) => { completed = true; }, "Connect", args);
         while (!completed)
         {
             await Task.Delay(100);

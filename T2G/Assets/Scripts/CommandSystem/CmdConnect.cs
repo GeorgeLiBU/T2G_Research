@@ -10,7 +10,16 @@ public class CmdConnect : Command
 
     public override bool Execute(params string[] args)
     {
-        CommunicatorClient.Instance.StartClient();        
+        if (args.Length > 0)
+        {
+            float timeoutScale = 1.0f;
+            if(float.TryParse(args[0], out timeoutScale))
+            {
+                CommunicatorClient.Instance.StartClient(timeoutScale);
+                return true;
+            }
+        }
+        CommunicatorClient.Instance.StartClient();
         return true;
     }
 
