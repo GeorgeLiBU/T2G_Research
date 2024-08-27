@@ -33,12 +33,13 @@ namespace T2G.UnityAdapter
         static CommunicatorServer _server;
         static Vector2 _scroll = Vector2.zero;
         static string _text = string.Empty;
+        static CommunicatorServerEditor _CommunicatorWindow = null;
 
         [MenuItem("T2G/Communicator", false)]
         public static void Dashboard()
         {
             Type inspectorType = Type.GetType("UnityEditor.InspectorWindow,UnityEditor.dll");
-            EditorWindow.GetWindow<CommunicatorServerEditor>("Communicator Server", new Type[] { inspectorType });
+            _CommunicatorWindow = EditorWindow.GetWindow<CommunicatorServerEditor>("Communicator Server", new Type[] { inspectorType });
         }
 
         [InitializeOnLoadMethod]
@@ -48,42 +49,42 @@ namespace T2G.UnityAdapter
 
             communicatorServer.OnServerStarted += () =>
             {
-                _text += "\n System> Server started.";
+                AddConsoleText("\n System> Server started.");
             };
 
             communicatorServer.AfterShutdownServer += () =>
             {
-                _text += "\n System> Server was shut down.";
+                AddConsoleText("\n System> Server was shut down.");
             };
 
             communicatorServer.OnFailedToStartServer += () => 
             {
-                _text += "\n System> Failed to start litsening server!";
+                AddConsoleText("\n System> Failed to start litsening server!");
             };
 
             communicatorServer.OnClientConnected += () =>
             {
-                _text += "\n System> Client was connected!";
+                AddConsoleText("\n System> Client was connected!");
             };
 
             communicatorServer.OnClientDisconnected += () =>
             {
-                _text += "\n System> Client was disconnected!";
+                AddConsoleText("\n System> Client was disconnected!");
             };
 
             communicatorServer.OnReceivedMessage += (message) =>
             {
-                _text += "\n Received> " + message;
+                AddConsoleText("\n Received> " + message);
             };
 
             communicatorServer.OnSentMessage += (message) =>
             {
-                _text += "\n Sent> " + message;
+                AddConsoleText("\n Sent> " + message);
             };
 
             communicatorServer.OnLogMessage += (message) =>
             {
-                _text += "\n Received> " + message;
+                AddConsoleText("\n Received> " + message);
             };
 
             if (_server == null)
@@ -100,6 +101,12 @@ namespace T2G.UnityAdapter
                 _text = string.Empty;
                 _server.StartServer();
             }
+        }
+
+        static void AddConsoleText(string textToAdd)
+        {
+            _text += textToAdd;
+            _CommunicatorWindow?.Repaint();
         }
 
         public static void Uninitialize()
@@ -141,7 +148,6 @@ namespace T2G.UnityAdapter
             _scroll = EditorGUILayout.BeginScrollView(_scroll);
             _text = EditorGUILayout.TextArea(_text, GUILayout.ExpandHeight(true));
             EditorGUILayout.EndScrollView();
-
         }
     }
 }

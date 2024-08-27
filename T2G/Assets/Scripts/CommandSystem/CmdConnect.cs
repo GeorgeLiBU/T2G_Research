@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using T2G.UnityAdapter;
+using System.Threading.Tasks;
 
 public class CmdConnect : Command
 {
@@ -10,17 +11,26 @@ public class CmdConnect : Command
 
     public override bool Execute(params string[] args)
     {
+        float timeoutScale = 1.0f;
         if (args.Length > 0)
         {
-            float timeoutScale = 1.0f;
-            if(float.TryParse(args[0], out timeoutScale))
-            {
-                CommunicatorClient.Instance.StartClient(timeoutScale);
-                return true;
-            }
+
+            float.TryParse(args[0], out timeoutScale);
         }
         CommunicatorClient.Instance.StartClient();
+        Task.Run(async () => {
+            await WaitForConnection();
+        });
         return true;
+    }
+
+    async Task WaitForConnection()
+    {
+        while (!CommunicatorClient.Instance.IsConnected)
+        {
+            await Task.Delay(100);
+        }
+        OnExecutionCompleted?.Invoke(true, ConsoleController.eSender.System, "Connected!");
     }
 
     public override string GetKey()

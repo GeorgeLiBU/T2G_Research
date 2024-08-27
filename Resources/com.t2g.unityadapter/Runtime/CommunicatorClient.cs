@@ -40,15 +40,6 @@ namespace T2G.UnityAdapter
             }
         }
 
-        protected override void Dispose()
-        {
-            if(IsConnected)
-            {
-                Disconnect();
-            }
-            base.Dispose();
-        }
-
         public void StartClient(float timeoutScale = 1.0f)
         {
             if (ClientState != eClientState.Disconnected)
@@ -81,7 +72,7 @@ namespace T2G.UnityAdapter
                 BeforeDiscinnectFromServer?.Invoke();
                 _connections[0].Disconnect(_networkDriver);
                 _networkDriver.ScheduleUpdate().Complete();
-                ClientState = eClientState.Disconnecting;
+                ClientState = eClientState.Disconnected;
             }
         }
 
