@@ -18,15 +18,13 @@ public class CmdConnect : Command
             float.TryParse(args[0], out timeoutScale);
         }
         CommunicatorClient.Instance.StartClient();
-        Task.Run(async () => {
-            await WaitForConnection();
-        });
+        Task.Run(async () => { await WaitForConnection(); });
         return true;
     }
 
     async Task WaitForConnection()
     {
-        while (!CommunicatorClient.Instance.IsConnected)
+        while (CommunicatorClient.Instance.ClientState == CommunicatorClient.eClientState.Connecting)
         {
             await Task.Delay(100);
         }

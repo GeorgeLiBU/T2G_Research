@@ -175,6 +175,19 @@ public class SimAssistant : MonoBehaviour
         console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was opened. Connecting ...");
         await Connect();
         console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was opened. Importing assets ...");
+
+        //...
+        //Create scene
+        //Add or confiure main camera
+        //Add or configure sky
+        //Generate ground
+        //Add player 
+        //Add player controller
+        //Add camera controller
+        //Add HUD
+        //Add game goal
+
+        //play (optional)
     }
 
     int GenerateGameFromGameDesc(string responseMessage)
