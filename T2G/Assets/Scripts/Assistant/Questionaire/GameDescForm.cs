@@ -63,8 +63,6 @@ public class GameDescForm : MonoBehaviour
             _GameTitle.text = gameDesc.Title;
             _Genre.value = _Genre.options.FindIndex(option => option.text.CompareTo(gameDesc.Genre) == 0);
             _ArtStyle.value = _ArtStyle.options.FindIndex(option => option.text.CompareTo(gameDesc.ArtStyle) == 0);
-            _Version.text = gameDesc.VersionNumber.ToString();
-            _MinorVersion.text = gameDesc.MinorVersionNumber.ToString();
             _Developer.text = gameDesc.Developer;
             _GameEngine.value = _GameEngine.options.FindIndex(option => option.text.CompareTo(gameDesc.Project.Engine) == 0);
             _Path.text = gameDesc.Project.Path;
@@ -106,8 +104,6 @@ public class GameDescForm : MonoBehaviour
         gameDesc.Title = _GameTitle.text;
         gameDesc.Genre = _Genre.options[_Genre.value].text;
         gameDesc.ArtStyle = _ArtStyle.options[_ArtStyle.value].text;
-        gameDesc.VersionNumber = int.Parse(_Version.text);
-        gameDesc.MinorVersionNumber = int.Parse(_MinorVersion.text);
         gameDesc.Developer = _Developer.text;
         gameDesc.Project.Engine = _GameEngine.options[_GameEngine.value].text;
         gameDesc.Project.Path = _Path.text;
