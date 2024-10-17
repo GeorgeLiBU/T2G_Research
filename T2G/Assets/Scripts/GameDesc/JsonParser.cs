@@ -19,6 +19,8 @@ public class JsonParser
         ""string"": ""Hello World""
     }";
 
+    public static string JSONText;
+
     public static JSONObject SerializeObject(object obj)
     {
         JSONObject jsonObject = null;
@@ -140,7 +142,7 @@ public class JsonParser
     public static bool SerializeAndSave(GameDesc gameDesc)
     {
         var jsonObj = SerializeObject(gameDesc);
-        string json = jsonObj.ToString();
+        string json = JSONText = jsonObj.ToString();
         var path = Path.Combine(Application.persistentDataPath, gameDesc.Name + ".gamedesc");
         File.WriteAllText(path, json);
         return true;
@@ -170,7 +172,7 @@ public class JsonParser
     public static JSONObject LoadGameDescJsonObject(string gameDescName)
     {
         JSONObject jsonObject = null;
-        string json = LoadGameDescJsonString(gameDescName);
+        string json = JSONText = LoadGameDescJsonString(gameDescName);
         if(json != null)
         {
             jsonObject = JSON.Parse(json).AsObject;

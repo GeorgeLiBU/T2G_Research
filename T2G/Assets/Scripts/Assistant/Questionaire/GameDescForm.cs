@@ -55,7 +55,7 @@ public class GameDescForm : MonoBehaviour
         _ViewProfileButton.interactable = !viewProfile;
         _ViewProfileButton.gameObject.SetActive(!viewProfile);
         _ViewJsonButton.interactable = viewProfile;
-        _ViewJsonButton.gameObject.SetActive(_ViewJsonButton);
+        _ViewJsonButton.gameObject.SetActive(viewProfile);
     }
 
     void InitForm(GameDesc gameDesc = null)
@@ -83,7 +83,7 @@ public class GameDescForm : MonoBehaviour
         _Path.text = _gameDesc.Project.Path;
         _ProjectName.text = _gameDesc.Project.Name;
         _GameStory.text = _gameDesc.GameStory;
-
+        _InputJson.text = JsonParser.JSONText;
     }
 
     public void OnSelectPath()
