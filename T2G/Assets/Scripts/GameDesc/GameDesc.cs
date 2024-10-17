@@ -8,17 +8,16 @@ using T2G.UnityAdapter;
 public class GameDesc : System.Object
 {
     public string Name;
-    public string Title;
-    public string Genre;
-    public string ArtStyle;
-    public string Developer;
-    public GameProject Project;
-    public GameWorld[] GameWorlds;
+    public string Title = string.Empty;
+    public string Genre = string.Empty;
+    public string ArtStyle = string.Empty;
+    public string Developer = string.Empty;
+    public GameProject Project = new GameProject();
+    public string GameStory = string.Empty;
+    public GameWorld[] GameWorlds = new GameWorld[1];
 
     public GameDesc()
     {
-        Project = new GameProject();
-        GameWorlds = new GameWorld[1];
         GameWorlds[0] = new GameWorld();
     }
 
@@ -27,22 +26,28 @@ public class GameDesc : System.Object
         return Path.Combine(Project.Path, Project.Name);
     }
 
-    static public GameDesc GetSample(int sampleId)
+
+    public static string[] SampleGameDescNames =
     {
-        GameDesc gameDesc = new GameDesc();
-        switch(sampleId)
+        "Load Sample ...",
+        "Marine Shooter"
+    };
+
+    public static bool GetSampleGameDesc(int sampleIndex, ref GameDesc gameDesc)
+    {
+        bool result = false;
+        switch (sampleIndex)
         {
-            case 0:
             case 1:
-                fillUpSampleGameDesc1(gameDesc);
+                result = GetSampleGameDesc1(ref gameDesc);
                 break;
             default:
                 break;
         }
-        return gameDesc;
+        return result;
     }
 
-    static void fillUpSampleGameDesc1(GameDesc gameDesc)
+    static bool GetSampleGameDesc1(ref GameDesc gameDesc)
     {
         gameDesc.Name = "Marine Shooter";
         gameDesc.Title = "Marine Shooter";
@@ -56,30 +61,26 @@ public class GameDesc : System.Object
         gameDesc.GameWorlds = new GameWorld[1];
         gameDesc.GameWorlds[0] = new GameWorld();
         gameDesc.GameWorlds[0].Name = "IlandBattleField";
-        gameDesc.GameWorlds[0].GameObjects = new GameObject[5];
-        gameDesc.GameWorlds[0].GameObjects[0] = new GameObject("MainCamera");
-        gameDesc.GameWorlds[0].GameObjects[0].Components = new ComponentBase[2];
+        gameDesc.GameWorlds[0].SceneObjects = new SceneObject[5];
+        gameDesc.GameWorlds[0].SceneObjects[0] = new SceneObject("MainCamera");
+        gameDesc.GameWorlds[0].SceneObjects[0].Components = new ComponentBase[2];
         MainCamera camera = new MainCamera();
-        gameDesc.GameWorlds[0].GameObjects[0].Components[0] = camera;
-    }
-
-    static void fillUpSampleGameDesc2(GameDesc gameDesc)
-    {
-
+        gameDesc.GameWorlds[0].SceneObjects[0].Components[0] = camera;
+        return true;
     }
 }
 
 public class GameProject
 {
     public string Engine = "Unity";
-    public string Path = "c:\\MyGames";
+    public string Path = "c:/MyGames";
     public string Name = "MyGame";
 }
 
 public class GameWorld
 {
     public string Name;
-    public GameObject[] GameObjects;
+    public SceneObject[] SceneObjects;
 
 
     public string Sky;
@@ -87,7 +88,7 @@ public class GameWorld
     public string Ground;
 }
 
-public class GameObject
+public class SceneObject
 {
     public string Name;
     public string Tags;
@@ -96,7 +97,7 @@ public class GameObject
     public float[] Scale = new float[3] { 1.0f, 1.0f, 1.0f };
     public ComponentBase[] Components = null;
     public string[] Scripts = null;
-    public GameObject(string name)
+    public SceneObject(string name)
     {
         Name = name;
     }

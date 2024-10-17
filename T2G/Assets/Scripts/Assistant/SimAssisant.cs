@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
-using 
+
 
 public class SimAssistant : MonoBehaviour
 {
-    [SerializeField] GameObject _AssistantDialogs;
+    [SerializeField] RectTransform _AssistantDialogsRectTransform;
     [SerializeField] GameDescForm _GameDescForm;
 
     GameDesc _gameDesc = new GameDesc();
@@ -207,7 +207,6 @@ public class SimAssistant : MonoBehaviour
 
     public void OnDestopPanelResized(float desktopHeight)
     {
-        var rectTransform = _AssistantDialogs.GetComponent<RectTransform>();
-        rectTransform.offsetMin = new Vector2(0.0f, desktopHeight);
+        _AssistantDialogsRectTransform.offsetMin = new Vector2(0.0f, desktopHeight);
     }
 }

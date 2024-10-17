@@ -3,78 +3,87 @@ using TMPro;
 using SFB;
 using T2G.UnityAdapter;
 using System.IO;
+using UnityEngine.UI;
 
 public class GameDescForm : MonoBehaviour
 {
+    static readonly string k_DefaultGameDescNameKey = "DefaultGameDescName";
+
     [SerializeField] TMP_InputField _GameDescName;
 
     [SerializeField] TMP_InputField _GameTitle;
     [SerializeField] TMP_Dropdown _Genre;
     [SerializeField] TMP_Dropdown _ArtStyle;
-    [SerializeField] TMP_InputField _Version;
-    [SerializeField] TMP_InputField _MinorVersion;
     [SerializeField] TMP_InputField _Developer;
 
     [SerializeField] TMP_Dropdown _GameEngine;
     [SerializeField] TMP_InputField _Path;
     [SerializeField] TMP_InputField _ProjectName;
 
-    [SerializeField] TMP_InputField _GameWorldName;
-    [SerializeField] TMP_Dropdown _Ground;
-    [SerializeField] TMP_Dropdown _Sunlight;
-    [SerializeField] TMP_Dropdown _PlayerCharacter;
-    [SerializeField] TMP_Dropdown _Camera;
-    [SerializeField] TMP_Dropdown _GameGoal;
-    [SerializeField] TMP_Dropdown _HUD;
+    [SerializeField] TMP_InputField _GameStory;
+
+    [SerializeField] GameObject _ProfileView;
+    [SerializeField] GameObject _JsonView;
+    [SerializeField] Button _ViewProfileButton;
+    [SerializeField] Button _ViewJsonButton;
+    [SerializeField] TMP_InputField _InputJson;
+
+    [SerializeField] TMP_Dropdown _SelectSampleGameDesc;
 
     [SerializeField] GameDescList _GameDescList;
 
+    GameDesc _gameDesc;
+
     private void OnEnable()
     {
-        InitForm();
+        _SelectSampleGameDesc.ClearOptions();
+        for (int i = 0; i < GameDesc.SampleGameDescNames.Length; ++i)
+        {
+            _SelectSampleGameDesc.options.Add(new TMP_Dropdown.OptionData(GameDesc.SampleGameDescNames[i]));
+        }
+
+        var gameDescName = PlayerPrefs.GetString(k_DefaultGameDescNameKey, string.Empty);
+        var gameDesc = JsonParser.LoadGameDesc(gameDescName);
+        InitForm(gameDesc);
+        SetViewPanel(true);
+    }
+
+    public void SetViewPanel(bool viewProfile)
+    {
+        _ProfileView.SetActive(viewProfile);
+        _JsonView.SetActive(!viewProfile);
+        _ViewProfileButton.interactable = !viewProfile;
+        _ViewProfileButton.gameObject.SetActive(!viewProfile);
+        _ViewJsonButton.interactable = viewProfile;
+        _ViewJsonButton.gameObject.SetActive(_ViewJsonButton);
     }
 
     void InitForm(GameDesc gameDesc = null)
     {
-        if(gameDesc == null)
+        if (gameDesc == null)
         {
-            _GameDescName.text = string.Empty;
-            _GameTitle.text = string.Empty;
-            _Genre.value = 0; 
-            _ArtStyle.value = 0;
-            _Version.text = "0";
-            _MinorVersion.text = "1";
-            _Developer.text = Settings.User;
-            _GameEngine.value = 0;
-            string prjPath = PlayerPrefs.GetString(Defs.k_ProjectPathname, string.Empty);
-            _Path.text = string.Empty; 
-            _ProjectName.text = Path.GetFileName(prjPath);
-            _GameWorldName.text = "World1";
-            _Ground.value = 0;
-            _Sunlight.value = 0;
-            _PlayerCharacter.value = 0;
-            _Camera.value = 0;
-            _GameGoal.value = 0;
-            _HUD.value = 0;
+            _gameDesc = new GameDesc();
+            _gameDesc.Name = "New Game";
+            _gameDesc.Developer = Settings.User;
+            _gameDesc.Project.Path = PlayerPrefs.GetString(Defs.k_ProjectPathname, string.Empty);
+            _gameDesc.Project.Name = Path.GetFileName(_gameDesc.Project.Path);
+            OnSave();
         }
         else
         {
-            _GameDescName.text = gameDesc.Name;
-            _GameTitle.text = gameDesc.Title;
-            _Genre.value = _Genre.options.FindIndex(option => option.text.CompareTo(gameDesc.Genre) == 0);
-            _ArtStyle.value = _ArtStyle.options.FindIndex(option => option.text.CompareTo(gameDesc.ArtStyle) == 0);
-            _Developer.text = gameDesc.Developer;
-            _GameEngine.value = _GameEngine.options.FindIndex(option => option.text.CompareTo(gameDesc.Project.Engine) == 0);
-            _Path.text = gameDesc.Project.Path;
-            _ProjectName.text = gameDesc.Project.Name;
-            _GameWorldName.text = gameDesc.GameWorlds[0].Name;
-            _Ground.value = _Ground.options.FindIndex(option => option.text.CompareTo(gameDesc.GameWorlds[0].Ground) == 0);
-            _Sunlight.value = _Sunlight.options.FindIndex(option => option.text.CompareTo(gameDesc.GameWorlds[0].SunLight) == 0);
-            _PlayerCharacter.value = _PlayerCharacter.options.FindIndex(option => option.text.CompareTo(gameDesc.GameWorlds[0].PlayerCharacter) == 0);
-            _Camera.value = _Camera.options.FindIndex(option => option.text.CompareTo(gameDesc.GameWorlds[0].Camera) == 0);
-            _GameGoal.value = _GameGoal.options.FindIndex(option => option.text.CompareTo(gameDesc.GameWorlds[0].GameGoal) == 0);
-            _HUD.value = _HUD.options.FindIndex(option => option.text.CompareTo(gameDesc.GameWorlds[0].HUD) == 0);
+            _gameDesc = gameDesc;
         }
+
+        _GameDescName.text = _gameDesc.Name;
+        _GameTitle.text = _gameDesc.Title;
+        _Genre.value = _Genre.options.FindIndex(option => option.text.CompareTo(_gameDesc.Genre) == 0);
+        _ArtStyle.value = _ArtStyle.options.FindIndex(option => option.text.CompareTo(_gameDesc.ArtStyle) == 0);
+        _Developer.text = _gameDesc.Developer;
+        _GameEngine.value = _GameEngine.options.FindIndex(option => option.text.CompareTo(_gameDesc.Project.Engine) == 0);
+        _Path.text = _gameDesc.Project.Path;
+        _ProjectName.text = _gameDesc.Project.Name;
+        _GameStory.text = _gameDesc.GameStory;
+
     }
 
     public void OnSelectPath()
@@ -96,31 +105,35 @@ public class GameDescForm : MonoBehaviour
         _GameDescList.gameObject.SetActive(true);
     }
 
+    public void OnLoadSample()
+    {
+        GameDesc gameDesc = new GameDesc();
+        if(GameDesc.GetSampleGameDesc(_SelectSampleGameDesc.value, ref gameDesc))
+        {
+            _gameDesc = gameDesc;
+            InitForm(gameDesc);
+        }
+    }
+
     public GameDesc GetGameDesc()
     {
-        var gameDesc = new GameDesc();
-
-        gameDesc.Name = _GameDescName.text;
-        gameDesc.Title = _GameTitle.text;
-        gameDesc.Genre = _Genre.options[_Genre.value].text;
-        gameDesc.ArtStyle = _ArtStyle.options[_ArtStyle.value].text;
-        gameDesc.Developer = _Developer.text;
-        gameDesc.Project.Engine = _GameEngine.options[_GameEngine.value].text;
-        gameDesc.Project.Path = _Path.text;
-        gameDesc.Project.Name = _ProjectName.text;
-        gameDesc.GameWorlds[0].Name = _GameWorldName.text;
-        gameDesc.GameWorlds[0].Ground = _Ground.options[_Ground.value].text;
-        gameDesc.GameWorlds[0].SunLight = _Sunlight.options[_Sunlight.value].text;
-        gameDesc.GameWorlds[0].PlayerCharacter = _PlayerCharacter.options[_PlayerCharacter.value].text;
-        gameDesc.GameWorlds[0].Camera = _Camera.options[_Camera.value].text;
-        gameDesc.GameWorlds[0].GameGoal = _GameGoal.options[_GameGoal.value].text;
-        gameDesc.GameWorlds[0].HUD = _HUD.options[_HUD.value].text;
-        return gameDesc;
+        _gameDesc.Name = _GameDescName.text;
+        _gameDesc.Title = _GameTitle.text;
+        _gameDesc.Genre = _Genre.options[_Genre.value].text;
+        _gameDesc.ArtStyle = _ArtStyle.options[_ArtStyle.value].text;
+        _gameDesc.Developer = _Developer.text;
+        _gameDesc.Project.Engine = _GameEngine.options[_GameEngine.value].text;
+        _gameDesc.Project.Path = _Path.text;
+        _gameDesc.Project.Name = _ProjectName.text;
+        _gameDesc.GameStory = _GameStory.text;
+        return _gameDesc;
     }
 
     public void OnSave()
     {
-        JsonParser.SerializeAndSave(GetGameDesc());
+        var gameDesc = GetGameDesc();
+        JsonParser.SerializeAndSave(gameDesc);
+        PlayerPrefs.SetString(k_DefaultGameDescNameKey, gameDesc.Name);
     }
 
     public void OnCancel()
