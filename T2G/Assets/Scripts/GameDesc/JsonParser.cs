@@ -19,12 +19,17 @@ public class JsonParser
         ""string"": ""Hello World""
     }";
 
+    static readonly int k_Indent = 4;
+    
     public static string JSONText;
 
     public static JSONObject SerializeObject(object obj)
     {
         JSONObject jsonObject = null;
-        string json = string.Empty;
+        if(obj == null)
+        {
+            return jsonObject;
+        }
         var objType = obj.GetType();
         if (objType.IsClass)
         {
@@ -141,11 +146,21 @@ public class JsonParser
 
     public static bool SerializeAndSave(GameDesc gameDesc)
     {
-        var jsonObj = SerializeObject(gameDesc);
-        string json = JSONText = jsonObj.ToString();
+        string json = Serialize(gameDesc);
+        if(string.IsNullOrEmpty(json))
+        {
+            return false;
+        }
         var path = Path.Combine(Application.persistentDataPath, gameDesc.Name + ".gamedesc");
         File.WriteAllText(path, json);
         return true;
+    }
+
+    public static string Serialize(GameDesc gameDesc)
+    {
+        var jsonObj = SerializeObject(gameDesc);
+        JSONText = jsonObj.ToString(k_Indent);
+        return JSONText;
     }
 
     public static List<string> GetGameDescList()

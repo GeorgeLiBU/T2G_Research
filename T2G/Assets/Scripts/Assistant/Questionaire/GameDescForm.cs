@@ -37,9 +37,9 @@ public class GameDescForm : MonoBehaviour
     private void OnEnable()
     {
         _SelectSampleGameDesc.ClearOptions();
-        for (int i = 0; i < GameDesc.SampleGameDescNames.Length; ++i)
+        for (int i = 0; i < SampleGameDescLibrary.SampleGameDescNames.Length; ++i)
         {
-            _SelectSampleGameDesc.options.Add(new TMP_Dropdown.OptionData(GameDesc.SampleGameDescNames[i]));
+            _SelectSampleGameDesc.options.Add(new TMP_Dropdown.OptionData(SampleGameDescLibrary.SampleGameDescNames[i]));
         }
 
         var gameDescName = PlayerPrefs.GetString(k_DefaultGameDescNameKey, string.Empty);
@@ -108,9 +108,10 @@ public class GameDescForm : MonoBehaviour
     public void OnLoadSample()
     {
         GameDesc gameDesc = new GameDesc();
-        if(GameDesc.GetSampleGameDesc(_SelectSampleGameDesc.value, ref gameDesc))
+        if(SampleGameDescLibrary.GetSampleGameDesc(_SelectSampleGameDesc.value, ref gameDesc))
         {
             _gameDesc = gameDesc;
+            JsonParser.Serialize(gameDesc);
             InitForm(gameDesc);
         }
     }

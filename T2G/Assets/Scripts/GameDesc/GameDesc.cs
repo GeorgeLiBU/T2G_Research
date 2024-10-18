@@ -5,27 +5,8 @@ using System;
 using System.IO;
 using T2G.UnityAdapter;
 
-public class GameDesc : System.Object
+public class SampleGameDescLibrary
 {
-    public string Name;
-    public string Title = string.Empty;
-    public string Genre = string.Empty;
-    public string ArtStyle = string.Empty;
-    public string Developer = string.Empty;
-    public GameProject Project = new GameProject();
-    public string GameStory = string.Empty;
-    public GameWorld[] GameWorlds = new GameWorld[1];
-
-    public GameDesc()
-    {
-        GameWorlds[0] = new GameWorld();
-    }
-
-    public string GetProjectPathName()
-    {
-        return Path.Combine(Project.Path, Project.Name);
-    }
-
 
     public static string[] SampleGameDescNames =
     {
@@ -67,6 +48,28 @@ public class GameDesc : System.Object
         MainCamera camera = new MainCamera();
         gameDesc.GameWorlds[0].SceneObjects[0].Components[0] = camera;
         return true;
+    }
+}
+
+public class GameDesc : System.Object
+{
+    public string Name;
+    public string Title = string.Empty;
+    public string Genre = string.Empty;
+    public string ArtStyle = string.Empty;
+    public string Developer = string.Empty;
+    public GameProject Project = new GameProject();
+    public string GameStory = string.Empty;
+    public GameWorld[] GameWorlds = new GameWorld[1];
+
+    public GameDesc()
+    {
+        GameWorlds[0] = new GameWorld();
+    }
+
+    public string GetProjectPathName()
+    {
+        return Path.Combine(Project.Path, Project.Name);
     }
 }
 
