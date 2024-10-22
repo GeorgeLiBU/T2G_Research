@@ -35,6 +35,9 @@ public class SampleGameDescLibrary
         gameDesc.Genre = "First Person Shooter";
         gameDesc.ArtStyle = "Realistic";
         gameDesc.Developer = "George";
+        gameDesc.GameStory = "Create a third-person shooter game. The player controls a marine swat to fight at a millitary zone on a secret island. " +
+            "The player character carries an AR15 to attack and kill all enemies on the way to destroy the enemy's base building. This mission requires " +
+            "the player to acomplish the task within 10 minutes.";
 
 #region Project settings
         gameDesc.Project = new GameProject();
@@ -66,19 +69,14 @@ public class SampleGameDescLibrary
 
         //Sky or background
 
-
         //light
-
 
         //Background music
 
 
-
-
-
         //Play character
 
-
+        //Camera
 
 
         #endregion GameWorld 1
@@ -170,13 +168,24 @@ public class ThirdPersonCameraController : ObjectController
     public string Type = "Third-person View";
     public float[] RelativeOffset = new float[3] { 0.0f, 3.0f, 5.0f }; 
     public string LookAtTarget;
+    
+    public ThirdPersonCameraController()
+    {
+        Script = "ThirdPersonCameraController.cs";
+    }
 }
 
 public class FirstPersonCameraController : ObjectController
 {
     public string Type = "First-person View";
     public float[] ViewOffset = new float[3] { 0.0f, 1.8f, 0.0f };
+
+    public FirstPersonCameraController()
+    {
+        Script = "FirstPersonCameraController.cs";
+    }
 }
+
 
 public class MixedFirstAndThirdPersonCameraController : ObjectController
 {
@@ -184,6 +193,11 @@ public class MixedFirstAndThirdPersonCameraController : ObjectController
     public float[] RelativeOffset = new float[3] { 0.0f, 3.0f, 5.0f };
     public float[] ViewOffset = new float[3] { 0.0f, 1.8f, 0.0f };
     public string LookAtTarget;
+
+    public MixedFirstAndThirdPersonCameraController()
+    {
+        Script = "MixedFirstAndThirdPersonCameraController.cs";
+    }
 }
 
 public class ViewCamera : ComponentBase

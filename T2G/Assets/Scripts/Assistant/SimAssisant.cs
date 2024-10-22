@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
-
+using T2G.UnityAdapter;
 
 public class SimAssistant : MonoBehaviour
 {
@@ -16,14 +16,15 @@ public class SimAssistant : MonoBehaviour
         "hi",
         "create a new game",
         "make a new game",
-        "generate game"
+        "generate game",
+        "Start generating"
     };
 
     string[] _responses = {
         "Hi {user}, I am {assistant}, your game development assistant. What can I do for you?",
         "Hello {user}, I am {assistant} who will assist you to develop games. What can I do for you?",
         "Okay! I need some initial information about the game, please fill up the Game Description form.",
-        "Generating the game ..."
+        "Okay, Start generating the game ..."
     };
 
   
@@ -44,6 +45,7 @@ public class SimAssistant : MonoBehaviour
         _promptResponseMap.Add(_prompts[2], new List<int>(new int[] { 2 }));
         _promptResponseMap.Add(_prompts[3], new List<int>(new int[] { 2 }));
         _promptResponseMap.Add(_prompts[4], new List<int>(new int[] { 3 }));
+        _promptResponseMap.Add(_prompts[5], new List<int>(new int[] { 3 }));
 
         _responseActionMap.Add(_responses[2], CollectGameProjectInformation);
         _responseActionMap.Add(_responses[3], GenerateGameFromGameDesc);
@@ -91,7 +93,6 @@ public class SimAssistant : MonoBehaviour
         }
         callBack?.Invoke(responseMessage);
     }
-
 
     int CollectGameProjectInformation(string responseMessage)
     {
@@ -154,18 +155,26 @@ public class SimAssistant : MonoBehaviour
         }
     }
 
-    async Task Connect()
+    async Task<bool> Connect(float timeout = 300.0f)
     {
-        bool completed = false;
         string[] args = new string[1] { "200" };
-        CommandSystem.Instance.ExecuteCommand((succeeded, sender, message) => { completed = true; }, "Connect", args);
-        while (!completed)
+        CommandSystem.Instance.ExecuteCommand((succeeded, sender, message) => {  }, "Connect", args);
+        float timer = 0.0f;
+        while (!CommunicatorClient.Instance.IsConnected && timer < timeout)
         {
             await Task.Delay(100);
+            timer += 0.1f;
         }
+
+        if(timer >= timeout)
+        {
+            return false;
+        }
+
+        return true;
     }
 
-    async void GenerateGameAsync(GameDesc gameDesc)
+    async void GenerateGameAsync(GameDesc gameDesc, string gameDescJson)
     {
         ConsoleController console = ConsoleController.Instance;
         await CreateProjectFromGameDesc(gameDesc);
@@ -173,22 +182,19 @@ public class SimAssistant : MonoBehaviour
         await InitProject(gameDesc);
         console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was initialized, opening the project in ...");
         await OpenProject(gameDesc);
-        console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was opened. Connecting ...");
-        await Connect();
-        console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was opened. Importing assets ...");
+        bool connected = await Connect();
+        if(!connected)
+        {
+            console.WriteConsoleMessage(ConsoleController.eSender.Error, "Connection to the game project has timed out! ");
+            return;
+        }
+        console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was opened and connected!");
 
-        //...
-        //Create scene
-        //Add or confiure main camera
-        //Add or configure sky
-        //Generate ground
-        //Add player 
-        //Add player controller
-        //Add camera controller
-        //Add HUD
-        //Add game goal
+        string[] instructions = Interpreter.GenerateInstructions(gameDescJson);
 
-        //play (optional)
+
+
+        
     }
 
     int GenerateGameFromGameDesc(string responseMessage)
@@ -200,7 +206,9 @@ public class SimAssistant : MonoBehaviour
         }
 
         var gameDesc = _GameDescForm.GetGameDesc();
-        GenerateGameAsync(gameDesc);
+        var gameDescJson = JsonParser.LoadGameDescJsonString("");
+
+        GenerateGameAsync(gameDesc, gameDescJson);
 
         return 0;
     }

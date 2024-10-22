@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+//#if UNITY_EDITOR
 
 using System;
 using UnityEngine;
@@ -9,22 +9,20 @@ namespace T2G.UnityAdapter
     [InitializeOnLoad]
     public class LauchEditorStartUp
     {
-        static readonly string k_Started = "SessionStartedKey";
         static LauchEditorStartUp()
         {
-            if (!SessionState.GetBool(k_Started, false))
+            bool dashboardIsOpen = SessionState.GetBool(Defs.k_DashboardIsOpen, true);
+            if (!dashboardIsOpen)
             {
                 EditorApplication.quitting += EditorApplication_quitting;
-
-                CommunicatorServerEditor.Dashboard();
-                CommunicatorServerEditor.InitializeOnLoad();
-                SessionState.SetBool(k_Started, true);
+                CommunicatorServerEditor.OpenDashboard();
             }
         }
 
         private static void EditorApplication_quitting()
         {
-            CommunicatorServerEditor.Uninitialize();
+            CommunicatorServerEditor.CloseDashboard();
+            EditorApplication.quitting -= EditorApplication_quitting;
         }
     }
 
@@ -36,11 +34,24 @@ namespace T2G.UnityAdapter
         static CommunicatorServerEditor _CommunicatorWindow = null;
 
         [MenuItem("T2G/Communicator", false)]
-        public static void Dashboard()
+        public static void OpenDashboard()
         {
             Type inspectorType = Type.GetType("UnityEditor.InspectorWindow,UnityEditor.dll");
             _CommunicatorWindow = EditorWindow.GetWindow<CommunicatorServerEditor>("Communicator Server", new Type[] { inspectorType });
+            SessionState.SetBool(Defs.k_DashboardIsOpen, true);
         }
+
+        public static void CloseDashboard()
+        {
+            CommunicatorServerEditor.Uninitialize();
+
+            if (_CommunicatorWindow != null)
+            {
+                _CommunicatorWindow.Close();
+            }
+            SessionState.SetBool(Defs.k_DashboardIsOpen, false);
+        }
+
 
         [InitializeOnLoadMethod]
         public static void InitializeOnLoad()
@@ -96,11 +107,20 @@ namespace T2G.UnityAdapter
                 };
             }
 
-            if (EditorPrefs.GetInt(Defs.k_InitStartListener, 1) != 0)
+#if T2G
+
+            bool startServer = EditorPrefs.GetBool(Defs.k_StartListener, true);
+            if (startServer)
             {
                 _text = string.Empty;
                 _server.StartServer();
+                EditorPrefs.SetBool(Defs.k_StartListener, true);
             }
+#else
+            _text = string.Empty;
+            _server.StartServer();
+            EditorPrefs.SetBool(Defs.k_StartListener, true);
+#endif
         }
 
         static void AddConsoleText(string textToAdd)
@@ -115,6 +135,17 @@ namespace T2G.UnityAdapter
             {
                 _server.StopServer();
             }
+
+            CommunicatorServer communicatorServer = CommunicatorServer.Instance;
+            communicatorServer.OnServerStarted = null;
+            communicatorServer.AfterShutdownServer = null;
+            communicatorServer.OnFailedToStartServer = null;
+            communicatorServer.OnClientConnected = null;
+            communicatorServer.OnClientDisconnected = null;
+            communicatorServer.OnReceivedMessage = null;
+            communicatorServer.OnSentMessage = null;
+            communicatorServer.OnLogMessage = null;
+            communicatorServer = null;
         }
 
         public void OnGUI()
@@ -138,7 +169,7 @@ namespace T2G.UnityAdapter
                 {
                     _server.StopServer();
                 }
-                EditorPrefs.SetInt(Defs.k_InitStartListener, isActive ? 1 : 0);
+                EditorPrefs.SetBool(Defs.k_StartListener, isActive);
             }
 
             EditorGUI.BeginDisabledGroup(true);
@@ -149,7 +180,12 @@ namespace T2G.UnityAdapter
             _text = EditorGUILayout.TextArea(_text, GUILayout.ExpandHeight(true));
             EditorGUILayout.EndScrollView();
         }
+
+        public static CommunicatorServer GetServer()
+        {
+            return _server;
+        }
     }
 }
 
-#endif
+//#endif

@@ -8,5 +8,6 @@ public class Defs
 
     public static readonly string k_InitRefreshAssetDatabase = "RefreshAssetData";
     public static readonly string k_InitOpenScene = "OpenScene";
-    public static readonly string k_InitStartListener = "StartListener";
+    public static readonly string k_DashboardIsOpen = "DashboardIsOpen";
+    public static readonly string k_StartListener = "StartListener";
 }
