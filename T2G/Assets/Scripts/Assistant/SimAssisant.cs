@@ -190,9 +190,9 @@ public class SimAssistant : MonoBehaviour
         }
         console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was opened and connected!");
 
-        string[] instructions = Interpreter.GenerateInstructions(gameDescJson);
+        string[] instructions = Interpreter.Interpret(gameDescJson);
 
-
+        
 
         
     }

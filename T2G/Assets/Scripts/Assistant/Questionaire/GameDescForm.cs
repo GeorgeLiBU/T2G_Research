@@ -24,9 +24,12 @@ public class GameDescForm : MonoBehaviour
 
     [SerializeField] GameObject _ProfileView;
     [SerializeField] GameObject _JsonView;
+    [SerializeField] GameObject _CommandsView;
     [SerializeField] Button _ViewProfileButton;
     [SerializeField] Button _ViewJsonButton;
+    [SerializeField] Button _ViewCommandButton;
     [SerializeField] TMP_InputField _InputJson;
+    [SerializeField] TMP_InputField _InputCommands;
 
     [SerializeField] TMP_Dropdown _SelectSampleGameDesc;
 
@@ -45,17 +48,28 @@ public class GameDescForm : MonoBehaviour
         var gameDescName = PlayerPrefs.GetString(k_DefaultGameDescNameKey, string.Empty);
         var gameDesc = JsonParser.LoadGameDesc(gameDescName);
         InitForm(gameDesc);
-        SetViewPanel(true);
+        SetViewPanel(0);
     }
 
-    public void SetViewPanel(bool viewProfile)
+    public void SetViewPanel(int viewIndex)
     {
-        _ProfileView.SetActive(viewProfile);
-        _JsonView.SetActive(!viewProfile);
-        _ViewProfileButton.interactable = !viewProfile;
-        _ViewProfileButton.gameObject.SetActive(!viewProfile);
-        _ViewJsonButton.interactable = viewProfile;
-        _ViewJsonButton.gameObject.SetActive(viewProfile);
+        _ProfileView.SetActive(viewIndex == 0);
+        _JsonView.SetActive(viewIndex == 1);
+        _CommandsView.SetActive(viewIndex == 2);
+
+        _ViewProfileButton.interactable = (viewIndex != 0);
+        _ViewJsonButton.interactable = (viewIndex != 1);
+        _ViewCommandButton.interactable = (viewIndex != 2); 
+
+        if(viewIndex == 2)
+        {
+            _InputCommands.text = string.Empty;
+            var cmds = Interpreter.Interpret(_InputJson.text);
+            foreach (var cmd in cmds)
+            {
+                _InputCommands.text += cmd + "\n";
+            }
+        }
     }
 
     void InitForm(GameDesc gameDesc = null)

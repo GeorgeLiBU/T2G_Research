@@ -4,35 +4,40 @@ using SimpleJSON;
 
 public class Interpreter 
 {
-    List<string> _instructions = new List<string>();
+    static List<string> _instructions = new List<string>();
 
-    public static string[] GenerateInstructions(string gameDesc)
+    public static string[] Interpret(string gameDescJson)
     {
-        return null;
-
-    }
-
-    public static GameDesc Deseialialize(JSONObject gameDescJsonObj)
-    {
-
-        GameDesc gameDesc = null;
-
-        if (gameDescJsonObj != null)
+        _instructions.Clear();
+        if (gameDescJson != null)
         {
-            gameDesc = new GameDesc();
-            DeseialializeObject(gameDesc, gameDescJsonObj);
+            JSONObject gameDescObj = JSON.Parse(gameDescJson).AsObject;
+            Interpret(gameDescObj);
         }
-        return gameDesc;
+
+        return _instructions.ToArray();
     }
 
-    static void DeseialializeObject(object obj, JSONObject jsonObj)
+    static void Interpret(JSONObject jsonObj)
     {
-        if (obj == null || jsonObj == null)
+        if (jsonObj == null)
         {
             return;
         }
 
-        var fields = obj.GetType().GetFields();
+        var enumerator = jsonObj.GetEnumerator();
+        
+        while(enumerator.MoveNext())
+        {
+            var field = enumerator.Current;
+            if(field.Key == "GameWords")
+            {
+                _instructions.Add(field.Key + ":" + field.Value);
+            }
+        }
+
+        /*
+
         foreach (var field in fields)
         {
             if (jsonObj.HasKey(field.Name))
@@ -89,7 +94,7 @@ public class Interpreter
                                 if (jsonElement != null)
                                 {
                                     var elementObj = Activator.CreateInstance(elementType);
-                                    DeseialializeObject(elementObj, jsonElement.AsObject);
+                                    Interpret(elementObj, jsonElement.AsObject);
                                     fieldArr.SetValue(elementObj, i);
                                 }
                                 else
@@ -138,7 +143,7 @@ public class Interpreter
                     if (jsonObj != null)
                     {
                         var fieldObject = Activator.CreateInstance(field.FieldType);
-                        DeseialializeObject(fieldObject, jsonObj[field.Name].AsObject);
+                        Interpret(fieldObject, jsonObj[field.Name].AsObject);
                         field.SetValue(obj, fieldObject);
                     }
                     else
@@ -148,6 +153,6 @@ public class Interpreter
                 }
             }
         }
+        */
     }
-
 }

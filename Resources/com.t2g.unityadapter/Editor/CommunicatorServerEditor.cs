@@ -108,7 +108,6 @@ namespace T2G.UnityAdapter
             }
 
 #if T2G
-
             bool startServer = EditorPrefs.GetBool(Defs.k_StartListener, true);
             if (startServer)
             {

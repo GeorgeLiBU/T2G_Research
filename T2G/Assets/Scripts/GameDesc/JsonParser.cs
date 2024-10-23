@@ -208,9 +208,7 @@ public class JsonParser
 
     public static GameDesc Deseialialize(JSONObject gameDescJsonObj)
     {
-
         GameDesc gameDesc = null;
-
         if (gameDescJsonObj != null)
         {
             gameDesc = new GameDesc();
