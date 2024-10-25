@@ -137,7 +137,6 @@ public class SceneObject
     public float[] Rotation = new float[4] { 0.0f, 0.0f, 0.0f, 1.0f };     //Quertanion
     public float[] Scale = new float[3] { 1.0f, 1.0f, 1.0f };
     public ComponentBase[] Components = null;
-    public string[] Scripts = null;
 }
 
 public class ComponentBase
@@ -165,12 +164,12 @@ public class ObjectController :  ComponentBase
 
 public class ThirdPersonCameraController : ObjectController
 {
-    public string Type = "Third-person View";
     public float[] RelativeOffset = new float[3] { 0.0f, 3.0f, 5.0f }; 
     public string LookAtTarget;
     
     public ThirdPersonCameraController()
     {
+        ComponentType = "Third-person View";
         Script = "ThirdPersonCameraController.cs";
     }
 }
@@ -182,10 +181,10 @@ public class FirstPersonCameraController : ObjectController
 
     public FirstPersonCameraController()
     {
+        ComponentType = "Third-person View";
         Script = "FirstPersonCameraController.cs";
     }
 }
-
 
 public class MixedFirstAndThirdPersonCameraController : ObjectController
 {
@@ -196,6 +195,7 @@ public class MixedFirstAndThirdPersonCameraController : ObjectController
 
     public MixedFirstAndThirdPersonCameraController()
     {
+        ComponentType = "Mixed First- and Third-person View";
         Script = "MixedFirstAndThirdPersonCameraController.cs";
     }
 }

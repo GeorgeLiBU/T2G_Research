@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using SimpleJSON;
 
 public class Interpreter 
@@ -12,18 +13,92 @@ public class Interpreter
         if (gameDescJson != null)
         {
             JSONObject gameDescObj = JSON.Parse(gameDescJson).AsObject;
-            Interpret(gameDescObj);
+            
+            //Fake to deserialize to GameDesc instance temporarily.
+            //TODO: Use universal parser later
+            FakeInterpret(gameDescObj);
+
+            //ParseInterpret(gameDescObj);
         }
 
         return _instructions.ToArray();
     }
 
-    static void Interpret(JSONObject jsonObj)
+    static void FakeInterpret(JSONObject gameDescObj)
+    {
+        GameDesc gameDesc = JsonParser.Deseialialize(gameDescObj);
+        foreach(var gameWorld in gameDesc.GameWorlds)
+        {
+            //Create scene
+            _instructions.Add($"CREATE_SCENE {gameWorld.Name}");
+
+            //Create game objects
+            foreach(var gameObj in gameWorld.SceneObjects)
+            {
+                StringBuilder sb = new StringBuilder($"ADD_OBJECT {gameObj.Name} TO_SCENE {gameWorld.Name}");
+                sb.Append($" AT ({gameObj.Position[0]},{gameObj.Position[1]},{gameObj.Position[2]}");
+                sb.Append($" ROTATION ({gameObj.Rotation[0]}, {gameObj.Rotation[1]}, {gameObj.Rotation[2]})");
+                sb.Append($" SCALE ({gameObj.Scale[0]}, {gameObj.Scale[1]}, {gameObj.Scale[2]})");
+                _instructions.Add(sb.ToString());
+                foreach(var component in gameObj.Components)
+                {
+                    if (component.ComponentType.CompareTo("Third-person View") == 0)
+                    {
+
+                    }
+                    else if (component.ComponentType.CompareTo("First-person View") == 0)
+                    {
+
+                    }
+                    else if (component.ComponentType.CompareTo("Mixed First- and Third-person View") == 0)
+                    {
+
+                    }
+
+                }
+            }
+
+
+
+        }
+    }
+
+    static void ParseInterpret(JSONObject jsonObj)
     {
         if (jsonObj == null)
         {
             return;
         }
+
+        if(jsonObj.IsArray)
+        {
+
+        }
+        else if(jsonObj.IsBoolean)
+        {
+
+        }
+        else if (jsonObj.IsNull)
+        {
+
+        }
+        else if (jsonObj.IsNumber)
+        {
+
+        }
+        else if (jsonObj.IsObject)
+        {
+
+        }
+        else if (jsonObj.IsString)
+        {
+
+        }
+        else
+        {
+
+        }
+
 
         var enumerator = jsonObj.GetEnumerator();
         
@@ -36,123 +111,6 @@ public class Interpreter
             }
         }
 
-        /*
-
-        foreach (var field in fields)
-        {
-            if (jsonObj.HasKey(field.Name))
-            {
-                if (field.FieldType.IsArray)
-                {
-                    var elementType = field.FieldType.GetElementType();
-                    JSONArray jsonArray = jsonObj[field.Name].AsArray;
-                    if (jsonArray == null)
-                    {
-                        field.SetValue(obj, null);
-                    }
-                    else
-                    {
-                        int arrLen = jsonArray.Count;
-                        var fieldArr = Array.CreateInstance(elementType, arrLen);
-                        field.SetValue(obj, fieldArr);
-                        for (int i = 0; i < arrLen; ++i)
-                        {
-                            if (elementType == typeof(string))
-                            {
-                                fieldArr.SetValue(jsonArray[i].Value, i);
-                            }
-                            else if (elementType.IsPrimitive)
-                            {
-                                if (elementType == typeof(float))
-                                {
-                                    fieldArr.SetValue(jsonArray[i].AsFloat, i);
-                                }
-                                else if (elementType == typeof(double))
-                                {
-                                    fieldArr.SetValue(jsonArray[i].AsDouble, i);
-                                }
-                                else if (elementType == typeof(int))
-                                {
-                                    fieldArr.SetValue(jsonArray[i].AsInt, i);
-                                }
-                                else if (elementType == typeof(long))
-                                {
-                                    fieldArr.SetValue(jsonArray[i].AsLong, i);
-                                }
-                                else if (elementType == typeof(ulong))
-                                {
-                                    fieldArr.SetValue(jsonArray[i].AsULong, i);
-                                }
-                                else if (elementType == typeof(bool))
-                                {
-                                    fieldArr.SetValue(jsonArray[i].AsBool, i);
-                                }
-                            }
-                            else if (elementType.IsClass)
-                            {
-                                var jsonElement = jsonArray[i].AsObject;
-                                if (jsonElement != null)
-                                {
-                                    var elementObj = Activator.CreateInstance(elementType);
-                                    Interpret(elementObj, jsonElement.AsObject);
-                                    fieldArr.SetValue(elementObj, i);
-                                }
-                                else
-                                {
-                                    fieldArr.SetValue(null, i);
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (field.FieldType == typeof(string))
-                {
-                    var strVal = jsonObj[field.Name];
-                    field.SetValue(obj, strVal.Value);
-                }
-                else if (field.FieldType.IsPrimitive)
-                {
-                    if (field.FieldType == typeof(float))
-                    {
-                        field.SetValue(obj, jsonObj[field.Name].AsFloat);
-                    }
-                    else if (field.FieldType == typeof(double))
-                    {
-                        field.SetValue(obj, jsonObj[field.Name].AsDouble);
-                    }
-                    else if (field.FieldType == typeof(int))
-                    {
-                        field.SetValue(obj, jsonObj[field.Name].AsInt);
-                    }
-                    else if (field.FieldType == typeof(long))
-                    {
-                        field.SetValue(obj, jsonObj[field.Name].AsLong);
-                    }
-                    else if (field.FieldType == typeof(ulong))
-                    {
-                        field.SetValue(obj, jsonObj[field.Name].AsULong);
-                    }
-                    else if (field.FieldType == typeof(bool))
-                    {
-                        field.SetValue(obj, jsonObj[field.Name].AsBool);
-                    }
-                }
-                else if (field.FieldType.IsClass)
-                {
-                    var jsonObject = jsonObj[field.Name].AsObject;
-                    if (jsonObj != null)
-                    {
-                        var fieldObject = Activator.CreateInstance(field.FieldType);
-                        Interpret(fieldObject, jsonObj[field.Name].AsObject);
-                        field.SetValue(obj, fieldObject);
-                    }
-                    else
-                    {
-                        field.SetValue(obj, null);
-                    }
-                }
-            }
-        }
-        */
+      
     }
 }
