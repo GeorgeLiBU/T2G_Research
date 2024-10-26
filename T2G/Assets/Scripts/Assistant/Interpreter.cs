@@ -35,6 +35,11 @@ public class Interpreter
             //Create game objects
             foreach(var gameObj in gameWorld.SceneObjects)
             {
+                if(gameObj == null)
+                {
+                    continue;
+                }
+
                 StringBuilder sb = new StringBuilder($"ADD_OBJECT {gameObj.Name} TO_SCENE {gameWorld.Name}");
                 sb.Append($" AT ({gameObj.Position[0]},{gameObj.Position[1]},{gameObj.Position[2]}");
                 sb.Append($" ROTATION ({gameObj.Rotation[0]}, {gameObj.Rotation[1]}, {gameObj.Rotation[2]})");
@@ -54,7 +59,6 @@ public class Interpreter
                     {
 
                     }
-
                 }
             }
 
