@@ -17,7 +17,6 @@ public class Interpreter
             //Fake to deserialize to GameDesc instance temporarily.
             //TODO: Use universal parser later
             FakeInterpret(gameDescObj);
-
             //ParseInterpret(gameDescObj);
         }
 
@@ -29,6 +28,11 @@ public class Interpreter
         GameDesc gameDesc = JsonParser.Deseialialize(gameDescObj);
         foreach(var gameWorld in gameDesc.GameWorlds)
         {
+            if(gameWorld == null || gameWorld.SceneObjects == null)
+            {
+                continue;
+            }
+
             //Create scene
             _instructions.Add($"CREATE_SCENE {gameWorld.Name}");
 
@@ -41,7 +45,7 @@ public class Interpreter
                 }
 
                 StringBuilder sb = new StringBuilder($"ADD_OBJECT {gameObj.Name} TO_SCENE {gameWorld.Name}");
-                sb.Append($" AT ({gameObj.Position[0]},{gameObj.Position[1]},{gameObj.Position[2]}");
+                sb.Append($" AT ({gameObj.Position[0]},{gameObj.Position[1]},{gameObj.Position[2]})");
                 sb.Append($" ROTATION ({gameObj.Rotation[0]}, {gameObj.Rotation[1]}, {gameObj.Rotation[2]})");
                 sb.Append($" SCALE ({gameObj.Scale[0]}, {gameObj.Scale[1]}, {gameObj.Scale[2]})");
                 _instructions.Add(sb.ToString());

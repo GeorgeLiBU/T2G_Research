@@ -49,6 +49,8 @@ public class ConsoleController : MonoBehaviour
 
     List<string> _messagePool = new List<string>();
 
+    public bool WaitForConnect = false;
+
     bool IsBusy
     {
         set
@@ -350,7 +352,10 @@ public class ConsoleController : MonoBehaviour
 
     void HandleOnFailedConnectToServer()
     {
-        WriteConsoleMessage(eSender.Error, "Failed to connect to the server!");
+        if (!WaitForConnect)
+        {
+            WriteConsoleMessage(eSender.Error, "Failed to connect to the server!");
+        }
     }
 
     void HandleOnReceivedMessage(string message)
@@ -364,7 +369,7 @@ public class ConsoleController : MonoBehaviour
 
     void HandleOnConnectedToServer()
     {
-        WriteConsoleMessage(eSender.Assistant, "Connected to the project!");
+        WriteConsoleMessage(eSender.System, "Connected to the project!");
 
         MessageStruct msgData = new MessageStruct
         {

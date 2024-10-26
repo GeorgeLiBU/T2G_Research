@@ -26,6 +26,15 @@ namespace T2G.UnityAdapter
         readonly float k_connectTimeout = 3.0f;
 
         public eClientState ClientState { get; private set; } = eClientState.Disconnected;
+        public override bool IsConnected
+        {
+            get
+            {
+                return (ClientState == eClientState.Connected);
+            }
+        }
+
+
 
         static CommunicatorClient _instance = null;
         public static CommunicatorClient Instance
@@ -40,7 +49,7 @@ namespace T2G.UnityAdapter
             }
         }
 
-        public void StartClient(float timeoutScale = 1.0f)
+        public void StartClient(float timeout = 0.0f)
         {
             if (ClientState != eClientState.Disconnected)
             {
@@ -59,7 +68,7 @@ namespace T2G.UnityAdapter
             {
                 endPoint = NetworkEndpoint.LoopbackIpv4.WithPort(Port);
             }
-            _connectTimer = timeoutScale > 0.0f ? k_connectTimeout * timeoutScale : k_connectTimeout;
+            _connectTimer = (timeout <= 0.0f) ? k_connectTimeout : timeout;
             _connections[0] = _networkDriver.Connect(endPoint);
             ClientState = eClientState.Connecting;
         }
@@ -125,6 +134,7 @@ namespace T2G.UnityAdapter
 
                 _jobHandle = _networkDriver.ScheduleUpdate();
                 _jobHandle = job.Schedule(_jobHandle);
+                _jobHandle.Complete();
             }
 
             ProcessPooledReceivedMessage();

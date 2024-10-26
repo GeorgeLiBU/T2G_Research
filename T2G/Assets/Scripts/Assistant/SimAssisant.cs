@@ -157,17 +157,21 @@ public class SimAssistant : MonoBehaviour
 
     async Task<bool> Connect(float timeout = 300.0f)
     {
-        string[] args = new string[1] { "200" };
-        CommandSystem.Instance.ExecuteCommand((succeeded, sender, message) => {  }, "Connect", args);
+        string[] args = new string[1] { ((int)timeout).ToString() };
+        ConsoleController.Instance.WaitForConnect = true;
+        //CommandSystem.Instance.ExecuteCommand((succeeded, sender, message) => {  }, "Connect", args);
+        CommunicatorClient.Instance.StartClient();
         float timer = 0.0f;
         while (!CommunicatorClient.Instance.IsConnected && timer < timeout)
         {
-            await Task.Delay(100);
-            timer += 0.1f;
+            await Task.Delay(1000);
+            timer += 1.0f;
         }
 
-        if(timer >= timeout)
+        ConsoleController.Instance.WaitForConnect = false;
+        if (timer >= timeout)
         {
+            ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.Error, "Failed to connect to the server!");
             return false;
         }
 
@@ -206,7 +210,7 @@ public class SimAssistant : MonoBehaviour
         }
 
         var gameDesc = _GameDescForm.GetGameDesc();
-        var gameDescJson = JsonParser.LoadGameDescJsonString("");
+        var gameDescJson = JsonParser.Serialize(gameDesc);
 
         GenerateGameAsync(gameDesc, gameDescJson);
 

@@ -31,7 +31,9 @@ namespace T2G.UnityAdapter
         static CommunicatorServer _server;
         static Vector2 _scroll = Vector2.zero;
         static string _text = string.Empty;
+        static bool _repaintText = false;
         static CommunicatorServerEditor _CommunicatorWindow = null;
+
 
         [MenuItem("T2G/Communicator", false)]
         public static void OpenDashboard()
@@ -122,10 +124,27 @@ namespace T2G.UnityAdapter
 #endif
         }
 
+        private void Update()
+        {
+            RepaintText();
+        }
+
+        void RepaintText()
+        {
+            if (_repaintText)
+            {
+                if (_CommunicatorWindow == null)
+                {
+                    _CommunicatorWindow = GetWindow<CommunicatorServerEditor>();
+                }
+                _CommunicatorWindow?.Repaint();
+            }
+        }
+
         static void AddConsoleText(string textToAdd)
         {
             _text += textToAdd;
-            _CommunicatorWindow?.Repaint();
+            _repaintText = true;
         }
 
         public static void Uninitialize()

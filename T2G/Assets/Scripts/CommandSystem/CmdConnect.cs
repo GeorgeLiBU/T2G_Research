@@ -14,21 +14,28 @@ public class CmdConnect : Command
         float timeoutScale = 1.0f;
         if (args.Length > 0)
         {
-
             float.TryParse(args[0], out timeoutScale);
         }
         CommunicatorClient.Instance.StartClient();
-        Task.Run(async () => { await WaitForConnection(); });
+         Task.Run(async () => { await WaitForConnection(timeoutScale); });
         return true;
     }
 
-    async Task WaitForConnection()
+    async Task WaitForConnection(float timeout)
     {
         while (CommunicatorClient.Instance.ClientState == CommunicatorClient.eClientState.Connecting)
         {
-            await Task.Delay(100);
+            await Task.Delay((int)(timeout));
         }
-        OnExecutionCompleted?.Invoke(true, ConsoleController.eSender.System, "Connected!");
+
+        if (CommunicatorClient.Instance.IsConnected)
+        {
+            OnExecutionCompleted?.Invoke(true, ConsoleController.eSender.System, "Connected!");
+        }
+        else
+        {
+            OnExecutionCompleted?.Invoke(false, ConsoleController.eSender.System, "Timeout!");
+        }
     }
 
     public override string GetKey()

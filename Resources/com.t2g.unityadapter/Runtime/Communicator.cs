@@ -127,7 +127,7 @@ namespace T2G.UnityAdapter
         protected NativeArray<NetworkConnection> _connections;
         protected JobHandle _jobHandle;
 
-  
+
         protected NativeArray<MessageStruct> _sendMessagePool;
         protected int _sendPoolHead = 0;
         protected int _sendPoolTail = 0;
@@ -200,8 +200,17 @@ namespace T2G.UnityAdapter
         public bool IsReceivingPoolFull => (
             (_receivePoolTail > 0 && _receivePoolHead == _receivePoolTail - 1)
             || (_receivePoolTail == 0 && _receivePoolHead == _receiveMessagePool.Length - 1));
-        public bool IsConnected => (_networkDriver.IsCreated && 
-            _connections != null && _connections.IsCreated && _connections.Length > 0 && _connections[0].IsCreated);
+        public virtual bool IsConnected
+        {
+            get
+            {
+                return (_networkDriver.IsCreated &&
+                        _connections != null && 
+                        _connections.IsCreated && 
+                        _connections.Length > 0 && 
+                        _connections[0].IsCreated);
+            }
+        }
 
         public bool SendMessage(MessageStruct messageData)
         {
