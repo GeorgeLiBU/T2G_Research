@@ -87,7 +87,7 @@ public partial class Interpreter
         {
             if(INS_CreateObject(jsonObj, ref _currentObjectName))
             {
-                TODO:  Add attributes
+                //TODO:  Add attributes
 
                 var key = jsonObj.Keys.GetEnumerator();
                 while (key.MoveNext())
