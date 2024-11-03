@@ -73,7 +73,7 @@ public partial class Interpreter
         {
             if(INS_CreateGameWorld(jsonObj, ref _currentWorldName))
             {
-                TODO: CmdCreateProject objects
+                //TODO: CmdCreateProject objects
 
                 var key = jsonObj.Keys.GetEnumerator();
                 while (key.MoveNext())
