@@ -52,20 +52,20 @@ public class SampleGameDescLibrary
 #region GameWorld 1
         gameDesc.GameWorlds[0] = new GameWorld();
         gameDesc.GameWorlds[0].Name = "IlandBattleField";
-        gameDesc.GameWorlds[0].SceneObjects = new SceneObject[5];
+        gameDesc.GameWorlds[0].Objects = new WorldObject[5];
 
         //Camera
-        gameDesc.GameWorlds[0].SceneObjects[0] = new SceneObject();
-        gameDesc.GameWorlds[0].SceneObjects[0].Name = "MainCamera";
-        gameDesc.GameWorlds[0].SceneObjects[0].Components = new ComponentBase[2];
-        ViewCamera camera = new ViewCamera();
+        gameDesc.GameWorlds[0].Objects[0] = new WorldObject();
+        gameDesc.GameWorlds[0].Objects[0].Name = "MainCamera";
+        gameDesc.GameWorlds[0].Objects[0].Attributes = new Attribute[2];
+        PerspectiveCamera camera = new PerspectiveCamera();
         camera.NearClipPlane = 1.0f;
         camera.FarClipPlane = 10000.0f;
         camera.FieldOfView = 50.0f;
-        gameDesc.GameWorlds[0].SceneObjects[0].Components[0] = camera;
+        gameDesc.GameWorlds[0].Objects[0].Attributes[0] = camera;
         ThirdPersonCameraController cameraController = new ThirdPersonCameraController();
         cameraController.LookAtTarget = "PlayerCharacter";
-        gameDesc.GameWorlds[0].SceneObjects[0].Components[1] = cameraController;
+        gameDesc.GameWorlds[0].Objects[0].Attributes[1] = cameraController;
 
         //Sky or background
 
@@ -90,6 +90,7 @@ public class SampleGameDescLibrary
 
 public class GameDesc : System.Object
 {
+    public string Category = Defs.k_GameDescCategory;
     public string Name;
     public string Title = string.Empty;
     public string Genre = string.Empty;
@@ -119,8 +120,9 @@ public class GameProject
 
 public class GameWorld
 {
+    public string Category = Defs.k_GameWorldCategory;
     public string Name;
-    public SceneObject[] SceneObjects;
+    public WorldObject[] Objects;
 
     public string Sky;
 
@@ -129,80 +131,62 @@ public class GameWorld
     public UI UI;
 }
 
-public class SceneObject
+public class WorldObject
 {
+    public string Catogory = Defs.k_WorldObjectCategory;
     public string Name = string.Empty;
     public string Tags = string.Empty;
     public float[] Position = new float[3] { 0.0f, 0.0f, 0.0f };
     public float[] Rotation = new float[4] { 0.0f, 0.0f, 0.0f, 1.0f };     //Quertanion
     public float[] Scale = new float[3] { 1.0f, 1.0f, 1.0f };
-    public ComponentBase[] Components = null;
+    public Attribute[] Attributes = null;
 }
 
-public class ComponentBase
+public class Attribute
 {
-    public string ComponentType;
-
-    T GetByType<T>()
-    {
-        var thisType = this.GetType();
-        if(typeof(T) == thisType)
-        {
-            T typeData = (T)Convert.ChangeType(this, typeof(T));
-            return typeData;
-        }
-
-        return default;
-    }
+    public string Catogory = Defs.k_ObjectAttributeCategory;
+    public string AttributeType = string.Empty;
+    public string Script = string.Empty;
 }
 
-public class ObjectController :  ComponentBase
-{
-    public string Name;
-    public string Script;
-}
-
-public class ThirdPersonCameraController : ObjectController
+public class ThirdPersonCameraController : Attribute
 {
     public float[] RelativeOffset = new float[3] { 0.0f, 3.0f, 5.0f }; 
-    public string LookAtTarget;
-    
+    public string LookAtTarget = string.Empty;
+
     public ThirdPersonCameraController()
     {
-        ComponentType = "Third-person View";
+        AttributeType = "Third-person View Controller";
         Script = "ThirdPersonCameraController.cs";
     }
 }
 
-public class FirstPersonCameraController : ObjectController
+public class FirstPersonCameraController : Attribute
 {
-    public string Type = "First-person View";
     public float[] ViewOffset = new float[3] { 0.0f, 1.8f, 0.0f };
 
     public FirstPersonCameraController()
     {
-        ComponentType = "Third-person View";
+        AttributeType = "First-person View Controller";
         Script = "FirstPersonCameraController.cs";
     }
 }
 
-public class MixedFirstAndThirdPersonCameraController : ObjectController
+public class MixedFirstAndThirdPersonCameraController : Attribute
 {
-    public string Type = "Mixed First- and Third-person View";
     public float[] RelativeOffset = new float[3] { 0.0f, 3.0f, 5.0f };
     public float[] ViewOffset = new float[3] { 0.0f, 1.8f, 0.0f };
     public string LookAtTarget;
 
     public MixedFirstAndThirdPersonCameraController()
     {
-        ComponentType = "Mixed First- and Third-person View";
+        AttributeType = "Mixed First- and Third-person View Controller";
         Script = "MixedFirstAndThirdPersonCameraController.cs";
     }
 }
 
-public class ViewCamera : ComponentBase
+public class PerspectiveCamera : Attribute
 {
-    public string CameraType = "Perspective";
     public string FOVAxis = "Vertical";
     public float FieldOfView = 60.0f;
     public float NearClipPlane = 0.1f;
@@ -211,9 +195,9 @@ public class ViewCamera : ComponentBase
     
     public string LookAtTarget;
 
-    public ViewCamera()
+    public PerspectiveCamera()
     {
-        ComponentType = "Camera";
+        AttributeType = "Perspective Camera";
     }
 }
 

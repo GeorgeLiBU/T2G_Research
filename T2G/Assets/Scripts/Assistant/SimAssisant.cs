@@ -178,7 +178,7 @@ public class SimAssistant : MonoBehaviour
         return true;
     }
 
-    async void GenerateGameAsync(GameDesc gameDesc, string gameDescJson)
+    async Task GenerateGameAsync(GameDesc gameDesc, string gameDescJson)
     {
         ConsoleController console = ConsoleController.Instance;
         await CreateProjectFromGameDesc(gameDesc);
@@ -196,9 +196,41 @@ public class SimAssistant : MonoBehaviour
 
         string[] instructions = Interpreter.Interpret(gameDescJson);
 
-        
+        int errorCode = 0;
+        for (int i = 0; i < instructions.Length; ++i)
+        {
+            errorCode = await SendInstruction(instructions[i]);
+            if(errorCode > 0)
+            {
+                break;
+            }
+        }
+        ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.Assistant, 
+            errorCode > 0 ? $"Game generation was interrupted. ErrorCode: {errorCode}" : "Game generation completed!");
+    }
 
-        
+    async Task<int> SendInstruction(string instruction, float timeout = 10.0f)
+    {
+        if(CommunicatorClient.Instance.SendMessage($"INS>{instruction}"))
+        {
+            ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.Assistant, $"Instruction>{instruction}");
+        }
+        while(!CommunicatorClient.Instance.GetReceivedMessage(out var response))
+        {
+            if(!CommunicatorClient.Instance.IsConnected)
+            {
+                ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.System, "Desconnected!");
+                return 1;
+            }
+            await Task.Delay(100);
+            timeout -= 0.1f;
+            if(timeout <= 0.0f)
+            {
+                ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.System, "Timeout!");
+                return 2;
+            }
+        }
+        return 0;
     }
 
     int GenerateGameFromGameDesc(string responseMessage)

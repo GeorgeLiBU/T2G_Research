@@ -229,6 +229,24 @@ namespace T2G.UnityAdapter
             return true;
         }
 
+        public bool SendMessage(string message)
+        {
+            if(string.IsNullOrEmpty(message))
+            {
+                return false;
+            }
+
+            MessageStruct msg = new MessageStruct
+            {
+                Type = eMessageType.String4096,
+                Message = message
+            };
+            SendMessage(msg); 
+
+            return true;
+        }
+
+
         public bool GetReceivedMessage(out MessageStruct messageData)
         {
             if (IsReceivePoolEmpty)
