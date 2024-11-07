@@ -18,12 +18,12 @@ public class Defs
     public static readonly string k_GameDesc_PositionKey = "Position";
     public static readonly string k_GameDesc_RotationKey = "Rotation";
     public static readonly string k_GameDesc_ScaleKey = "Scale";
-    public static readonly string k_GameDesc_TagsKey = "Tags";
-    public static readonly string k_GameDesc_AttributesKey = "Attributes";
+    public static readonly string k_GameDesc_AddonsKey = "Addons";
+    public static readonly string k_GameDesc_AddonTypeKey = "AddonType";
 
     //GameDesc category names
     public static readonly string k_GameDescCategory = "GameDesc";
     public static readonly string k_GameWorldCategory = "GameWorld";
     public static readonly string k_WorldObjectCategory = "WorldObject";
-    public static readonly string k_ObjectAttributeCategory = "Attribute";
+    public static readonly string k_ObjectAddonCategory = "Addon";
 }

@@ -57,15 +57,15 @@ public class SampleGameDescLibrary
         //Camera
         gameDesc.GameWorlds[0].Objects[0] = new WorldObject();
         gameDesc.GameWorlds[0].Objects[0].Name = "MainCamera";
-        gameDesc.GameWorlds[0].Objects[0].Attributes = new Attribute[2];
+        gameDesc.GameWorlds[0].Objects[0].Addons = new Addon[2];
         PerspectiveCamera camera = new PerspectiveCamera();
         camera.NearClipPlane = 1.0f;
         camera.FarClipPlane = 10000.0f;
         camera.FieldOfView = 50.0f;
-        gameDesc.GameWorlds[0].Objects[0].Attributes[0] = camera;
+        gameDesc.GameWorlds[0].Objects[0].Addons[0] = camera;
         ThirdPersonCameraController cameraController = new ThirdPersonCameraController();
-        cameraController.LookAtTarget = "PlayerCharacter";
-        gameDesc.GameWorlds[0].Objects[0].Attributes[1] = cameraController;
+        cameraController.Target = "PlayerCharacter";
+        gameDesc.GameWorlds[0].Objects[0].Addons[1] = cameraController;
 
         //Sky or background
 
@@ -76,10 +76,9 @@ public class SampleGameDescLibrary
 
         //Play character
 
-        //Camera
-
 
         #endregion GameWorld 1
+
         #endregion Game worlds
 
 
@@ -133,71 +132,72 @@ public class GameWorld
 
 public class WorldObject
 {
-    public string Catogory = Defs.k_WorldObjectCategory;
+    public string Category = Defs.k_WorldObjectCategory;
     public string Name = string.Empty;
-    public string Tags = string.Empty;
     public float[] Position = new float[3] { 0.0f, 0.0f, 0.0f };
-    public float[] Rotation = new float[4] { 0.0f, 0.0f, 0.0f, 1.0f };     //Quertanion
+    public float[] Rotation = new float[3] { 0.0f, 0.0f, 0.0f };     //Euler angles
     public float[] Scale = new float[3] { 1.0f, 1.0f, 1.0f };
-    public Attribute[] Attributes = null;
+    public Addon[] Addons = null;
 }
 
-public class Attribute
+public class Addon
 {
-    public string Catogory = Defs.k_ObjectAttributeCategory;
-    public string AttributeType = string.Empty;
+    public string Category = Defs.k_ObjectAddonCategory;
+    public string AddonType = Defs.k_GameDesc_AddonTypeKey;
+}
+
+public class ScriptAddon : Addon
+{
     public string Script = string.Empty;
 }
 
-public class ThirdPersonCameraController : Attribute
+
+public class ThirdPersonCameraController : ScriptAddon
 {
-    public float[] RelativeOffset = new float[3] { 0.0f, 3.0f, 5.0f }; 
-    public string LookAtTarget = string.Empty;
+    public float[] Offset = new float[3] { 0.0f, 3.0f, 5.0f }; 
+    public string Target = string.Empty;
 
     public ThirdPersonCameraController()
     {
-        AttributeType = "Third-person View Controller";
+        AddonType = "Third-person View Controller";
         Script = "ThirdPersonCameraController.cs";
     }
 }
 
-public class FirstPersonCameraController : Attribute
+public class FirstPersonCameraController : ScriptAddon
 {
     public float[] ViewOffset = new float[3] { 0.0f, 1.8f, 0.0f };
 
     public FirstPersonCameraController()
     {
-        AttributeType = "First-person View Controller";
+        AddonType = "First-person View Controller";
         Script = "FirstPersonCameraController.cs";
     }
 }
 
-public class MixedFirstAndThirdPersonCameraController : Attribute
+public class MixedFirstAndThirdPersonCameraController : ScriptAddon
 {
-    public float[] RelativeOffset = new float[3] { 0.0f, 3.0f, 5.0f };
+    public float[] Offset = new float[3] { 0.0f, 3.0f, 5.0f };
     public float[] ViewOffset = new float[3] { 0.0f, 1.8f, 0.0f };
     public string LookAtTarget;
 
     public MixedFirstAndThirdPersonCameraController()
     {
-        AttributeType = "Mixed First- and Third-person View Controller";
+        AddonType = "Mixed First- and Third-person View Controller";
         Script = "MixedFirstAndThirdPersonCameraController.cs";
     }
 }
 
-public class PerspectiveCamera : Attribute
+public class PerspectiveCamera : Addon
 {
     public string FOVAxis = "Vertical";
     public float FieldOfView = 60.0f;
     public float NearClipPlane = 0.1f;
     public float FarClipPlane = 1000.0f;
     public float[] ViewportRect = new float[4] { 0.0f, 0.0f, 1.0f, 1.0f };
-    
-    public string LookAtTarget;
-
     public PerspectiveCamera()
     {
-        AttributeType = "Perspective Camera";
+        AddonType = "Perspective Camera";
     }
 }
 

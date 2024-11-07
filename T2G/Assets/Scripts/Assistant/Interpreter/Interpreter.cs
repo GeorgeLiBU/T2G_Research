@@ -73,13 +73,10 @@ public partial class Interpreter
         {
             if(INS_CreateGameWorld(jsonObj, ref _currentWorldName))
             {
-                //TODO: CmdCreateProject objects
-
                 var key = jsonObj.Keys.GetEnumerator();
                 while (key.MoveNext())
                 {
                     Interpret(jsonObj.GetValueOrDefault(key.Current, null));
-                    //cal directly InterpretByCategoryName?
                 }
             }
         }
@@ -87,8 +84,6 @@ public partial class Interpreter
         {
             if(INS_CreateObject(jsonObj, ref _currentObjectName))
             {
-                //TODO:  Add attributes
-
                 var key = jsonObj.Keys.GetEnumerator();
                 while (key.MoveNext())
                 {
@@ -96,9 +91,13 @@ public partial class Interpreter
                 }
             }
         }
-        else if (category.CompareTo(Defs.k_ObjectAttributeCategory) == 0)
+        else if (category.CompareTo(Defs.k_ObjectAddonCategory) == 0)
         {
+            if(INS_AddAddon(jsonObj, _currentObjectName))
+            {
 
+
+            }
         }
         else if (category.CompareTo(Defs.k_GameDescCategory) == 0)
         {

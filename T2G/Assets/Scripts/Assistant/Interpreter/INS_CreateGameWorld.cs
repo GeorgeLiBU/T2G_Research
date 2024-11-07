@@ -9,7 +9,7 @@ public partial class Interpreter
         {
             return false;
         }
-        _instructions.Add($"CREATE_WORLD {worldName}");
+        _instructions.Add($"CREATE_WORLD \"{worldName}\"");
         return true;
     }
 }
