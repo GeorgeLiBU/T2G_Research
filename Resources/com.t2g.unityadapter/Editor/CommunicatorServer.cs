@@ -56,12 +56,16 @@ namespace T2G.UnityAdapter
             var endpoint = NetworkEndpoint.AnyIpv4.WithPort(Port);
             if (_networkDriver.Bind(endpoint) == 0)
             {
+
                 _networkDriver.Listen();
                 OnServerStarted?.Invoke();
             }
             else
             {
                 Dispose();
+#if T2G
+                EditorPrefs.SetBool(Defs.k_StartListener, false);
+#endif
                 OnFailedToStartServer?.Invoke();
             }
 

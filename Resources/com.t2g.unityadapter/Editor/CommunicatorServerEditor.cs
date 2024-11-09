@@ -88,6 +88,11 @@ namespace T2G.UnityAdapter
             communicatorServer.OnReceivedMessage += (message) =>
             {
                 AddConsoleText("\n Received> " + message);
+                if(Executor.Instance.Execute(message))
+                {
+                    CommunicatorServer.Instance.SendMessage("Done!");
+                }
+                CommunicatorServer.Instance.GetReceivedMessage(out var messageData);  //Remove message from the pool
             };
 
             communicatorServer.OnSentMessage += (message) =>
@@ -110,17 +115,15 @@ namespace T2G.UnityAdapter
             }
 
 #if T2G
-            bool startServer = EditorPrefs.GetBool(Defs.k_StartListener, true);
+            bool startServer = EditorPrefs.GetBool(Defs.k_StartListener, false);
             if (startServer)
             {
                 _text = string.Empty;
                 _server.StartServer();
-                EditorPrefs.SetBool(Defs.k_StartListener, true);
             }
 #else
             _text = string.Empty;
             _server.StartServer();
-            EditorPrefs.SetBool(Defs.k_StartListener, true);
 #endif
         }
 

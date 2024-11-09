@@ -18,6 +18,7 @@ public class Defs
     public static readonly string k_GameDesc_PositionKey = "Position";
     public static readonly string k_GameDesc_RotationKey = "Rotation";
     public static readonly string k_GameDesc_ScaleKey = "Scale";
+    public static readonly string k_GameDesc_PrefabKey = "Prefab";
     public static readonly string k_GameDesc_AddonsKey = "Addons";
     public static readonly string k_GameDesc_AddonTypeKey = "AddonType";
 

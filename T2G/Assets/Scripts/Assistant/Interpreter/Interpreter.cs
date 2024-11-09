@@ -48,15 +48,15 @@ public partial class Interpreter
         }
         else if(jsonNode.IsBoolean)
         {
-
+            //Do nothing
         }
         else if(jsonNode.IsNumber)
         {
-
+            //Do nothing
         }
         else if(jsonNode.IsString)
         {
-
+            //Do nothing
         }
     }
 
@@ -93,11 +93,7 @@ public partial class Interpreter
         }
         else if (category.CompareTo(Defs.k_ObjectAddonCategory) == 0)
         {
-            if(INS_AddAddon(jsonObj, _currentObjectName))
-            {
-
-
-            }
+            INS_AddAddon(jsonObj, _currentWorldName, _currentObjectName);
         }
         else if (category.CompareTo(Defs.k_GameDescCategory) == 0)
         {
@@ -107,5 +103,19 @@ public partial class Interpreter
 
 
         return true;
+    }
+
+    public static bool IsNotEmptyString(string strToCheck)
+    {
+        return !(string.IsNullOrWhiteSpace(strToCheck) || string.Compare(strToCheck, "\"\"") == 0);
+    }
+
+    public static string StripOffQuotes(string strToProcess)
+    {
+        if(strToProcess.Substring(0, 1) == "\"" && strToProcess.Substring(strToProcess.Length - 1, 1) == "\"")
+        {
+            return strToProcess.Substring(1, strToProcess.Length - 2);
+        }
+        return strToProcess;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public partial class Executor
@@ -29,24 +30,46 @@ public partial class Executor
         }
     }
 
-    public class ScriptParser
+    private List<ScriptCommand> Parse(string[] instructions)
     {
-        public List<ScriptCommand> Parse(string[] scriptLines)
+        List<ScriptCommand> commands = new List<ScriptCommand>();
+
+        foreach (var instruction in instructions)
         {
-            List<ScriptCommand> commands = new List<ScriptCommand>();
+            var commandTuple = ParseInstruction(instruction);
 
-            foreach (var line in scriptLines)
-            {
-                var parts = line.Split(' ');
-                string command = parts[0];
-                var arguments = new List<string>(parts[1..]);
-
-                commands.Add(new ScriptCommand(command, arguments));
-            }
-
-            return commands;
+            commands.Add(new ScriptCommand(commandTuple.command, commandTuple.arguments));
         }
+
+        return commands;
     }
+
+    private (string command, List<string> arguments) ParseInstruction(string instruction)
+    {
+        if (string.IsNullOrWhiteSpace(instruction))
+        {
+            throw new ArgumentException("Input cannot be null or whitespace.");
+        }
+
+        // Regular expression to match the command and arguments
+        var matches = Regex.Matches(instruction, @"[\""].+?[\""]|[^ ]+");
+
+        if (matches.Count == 0)
+        {
+            throw new ArgumentException("No command found in input.");
+        }
+
+        var command = matches[0].Value.Trim('"');
+        var arguments = new List<string>();
+
+        for (int i = 1; i < matches.Count; i++)
+        {
+            arguments.Add(matches[i].Value.Trim('"'));
+        }
+
+        return (command, arguments);
+    }
+
 
     Dictionary<string, Action<ScriptCommand>> _commandHandlers;
 
@@ -55,13 +78,13 @@ public partial class Executor
         // Initialize the dictionary with supported commands.
         _commandHandlers = new Dictionary<string, Action<ScriptCommand>>
         {
-            { "ADD_OBJECT", HandleAddObject },
-            { "SET_PROPERTY", HandleSetProperty },
-            { "SET_SKY_TIME", HandleSetSkyTime }
+            { "CREATE_WORLD", HandleCreateWorld },
+            { "CREATE_OBJECT", HandleCreateObject },
+            { "ADDON", HandleAddOn }
         };
     }
 
-    public void Execute(List<ScriptCommand> commands)
+    private void Execute(List<ScriptCommand> commands)
     {
         foreach(var command in commands)
         {
@@ -69,7 +92,7 @@ public partial class Executor
         }
     }
 
-    public void Execute(ScriptCommand command)
+    private void Execute(ScriptCommand command)
     {
         if (_commandHandlers.ContainsKey(command.Command))
         {
@@ -79,6 +102,19 @@ public partial class Executor
         {
             Debug.LogWarning($"[Executor.Execute] Unrecognized command: {command.Command}");
         }
+    }
+
+    public bool Execute(string message)
+    {
+        if(message.Substring(0, 4).CompareTo("INS>") == 0)
+        {
+
+            var commandTuple = ParseInstruction(message.Substring(4));
+            var command = new ScriptCommand(commandTuple.command, commandTuple.arguments);
+            Execute(command);
+            return true;
+        }
+        return false;
     }
 
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public partial class Executor
 {
-    private void HandleAddObject(ScriptCommand command)
+    private void HandleCreateWorld(ScriptCommand command)
     {
         string objectName = command.Arguments[0].Trim('"');
         string sceneName = command.Arguments[2].Trim('"');
@@ -26,8 +26,7 @@ public partial class Executor
         }
     }
 
-    // Handle SET_PROPERTY command.
-    private void HandleSetProperty(ScriptCommand command)
+    private void HandleCreateObject(ScriptCommand command)
     {
         string objectName = command.Arguments[0].Trim('"');
         string componentName = command.Arguments[2].Trim('"');
@@ -63,8 +62,7 @@ public partial class Executor
         }
     }
 
-    // Handle SET_SKY_TIME command.
-    private void HandleSetSkyTime(ScriptCommand command)
+    private void HandleAddOn(ScriptCommand command)
     {
         string timeOfDay = command.Arguments[0].Trim('"');
         string timeValue = command.Arguments[2].Trim('"');

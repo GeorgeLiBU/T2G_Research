@@ -106,7 +106,7 @@ public class ConsoleController : MonoBehaviour
     private void OnDestroy()
     {
         CommunicatorClient communicatorClient = CommunicatorClient.Instance;
-        communicatorClient.OnReceivedMessage += HandleOnReceivedMessage;
+        communicatorClient.OnReceivedMessage -= HandleOnReceivedMessage;
         communicatorClient.OnFailedToConnectToServer -= HandleOnFailedConnectToServer;
         communicatorClient.OnConnectedToServer -= HandleOnConnectedToServer;
         communicatorClient.Disconnect();

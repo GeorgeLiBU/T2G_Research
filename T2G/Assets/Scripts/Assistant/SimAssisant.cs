@@ -178,7 +178,7 @@ public class SimAssistant : MonoBehaviour
         return true;
     }
 
-    async Task GenerateGameAsync(GameDesc gameDesc, string gameDescJson)
+    async Task GenerateGameAsync(GameDesc gameDesc, string gameDescJson, bool skipGeneratingProject = false)
     {
         ConsoleController console = ConsoleController.Instance;
         await CreateProjectFromGameDesc(gameDesc);
@@ -244,8 +244,10 @@ public class SimAssistant : MonoBehaviour
         var gameDesc = _GameDescForm.GetGameDesc();
         var gameDescJson = JsonParser.Serialize(gameDesc);
 
-        GenerateGameAsync(gameDesc, gameDescJson);
-
+        Task generateTask = new Task(async () => { await GenerateGameAsync(gameDesc, gameDescJson, CommunicatorClient.Instance.IsConnected); });
+        generateTask.Start();
+        generateTask.Wait();
+        
         return 0;
     }
 

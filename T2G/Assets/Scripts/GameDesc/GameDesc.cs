@@ -47,7 +47,7 @@ public class SampleGameDescLibrary
 #endregion Project settings
 
 #region Game worlds
-        gameDesc.GameWorlds = new GameWorld[1];
+        gameDesc.GameWorlds = new GameWorld[2];
 
 #region GameWorld 1
         gameDesc.GameWorlds[0] = new GameWorld();
@@ -66,18 +66,43 @@ public class SampleGameDescLibrary
         ThirdPersonCameraController cameraController = new ThirdPersonCameraController();
         cameraController.Target = "PlayerCharacter";
         gameDesc.GameWorlds[0].Objects[0].Addons[1] = cameraController;
-
-        //Sky or background
-
         //light
-
-        //Background music
-
-
+        gameDesc.GameWorlds[0].Objects[1] = new WorldObject();
+        gameDesc.GameWorlds[0].Objects[1].Rotation = new float[3] { 50.0f, -30.0f, 0.0f };
+        gameDesc.GameWorlds[0].Objects[1].Name = "SunLight";
+        gameDesc.GameWorlds[0].Objects[1].Addons = new Addon[1];
+        DirectionalLight sunLight = new DirectionalLight();
+        gameDesc.GameWorlds[0].Objects[1].Addons[0] = sunLight;
+        //Ground
+        gameDesc.GameWorlds[0].Objects[2] = new WorldObject();
+        gameDesc.GameWorlds[0].Objects[2].Name = "Ground";
+        gameDesc.GameWorlds[0].Objects[2].Addons = new Addon[1];
+        Primitive ground = new Primitive();
+        ground.PrimitiveType = "plane";
+        ground.SizeScale = 30.0f;
+        gameDesc.GameWorlds[0].Objects[2].Addons[0] = ground;
         //Play character
+        gameDesc.GameWorlds[0].Objects[3] = new WorldObject();
+        gameDesc.GameWorlds[0].Objects[3].Name = "PlayerCharacter";
+        gameDesc.GameWorlds[0].Objects[3].Prefab = "Swat";
+        gameDesc.GameWorlds[0].Objects[3].Position = new float[3] { 0.0f, 0.0f, 10.0f };
+        gameDesc.GameWorlds[0].Objects[3].Rotation = new float[3] { 0.0f, 0.0f, 0.0f };
 
+        //HUD
+
+        //Quest
 
         #endregion GameWorld 1
+
+        #region GameWorld 2
+
+        gameDesc.GameWorlds[1] = new GameWorld();
+        gameDesc.GameWorlds[1].Name = "Main Menu";
+        gameDesc.GameWorlds[1].IsBootstrap = true;
+
+        //UI
+
+        #endregion GameWorld 2
 
         #endregion Game worlds
 
@@ -122,12 +147,14 @@ public class GameWorld
     public string Category = Defs.k_GameWorldCategory;
     public string Name;
     public WorldObject[] Objects;
+    public bool IsBootstrap = false;
+    public float Gravity = -9.8f;
 
     public string Sky;
 
     public string Ground;
 
-    public UI UI;
+    public UI HUD;
 }
 
 public class WorldObject
@@ -138,6 +165,7 @@ public class WorldObject
     public float[] Rotation = new float[3] { 0.0f, 0.0f, 0.0f };     //Euler angles
     public float[] Scale = new float[3] { 1.0f, 1.0f, 1.0f };
     public Addon[] Addons = null;
+    public string Prefab = string.Empty;
 }
 
 public class Addon
@@ -150,7 +178,6 @@ public class ScriptAddon : Addon
 {
     public string Script = string.Empty;
 }
-
 
 public class ThirdPersonCameraController : ScriptAddon
 {
@@ -198,6 +225,26 @@ public class PerspectiveCamera : Addon
     public PerspectiveCamera()
     {
         AddonType = "Perspective Camera";
+    }
+}
+
+public class DirectionalLight : Addon
+{
+    public float[] Color = new float[3] { 0.9f, 0.9f, 0.9f };
+    public float Intensity = 1.0f;
+    public DirectionalLight()
+    {
+        AddonType = "DirecionalLight";
+    }
+}
+
+public class Primitive : Addon
+{
+    public string PrimitiveType = "cube";  //cube, sphere, plane, quade
+    public float SizeScale = 1.0f;
+    public Primitive()
+    {
+        AddonType = "Primitive";
     }
 }
 
