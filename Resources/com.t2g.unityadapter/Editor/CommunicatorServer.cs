@@ -20,6 +20,7 @@ namespace T2G.UnityAdapter
         public Action BeforeShutdownServer;
         public Action AfterShutdownServer;
         public Action<string> OnLogMessage;
+        public Action<string> OnReceivedInstruction;
 
         static CommunicatorServer _instance = null;
         public static CommunicatorServer Instance
@@ -130,6 +131,17 @@ namespace T2G.UnityAdapter
             }
 
             ProcessPooledReceivedMessage();
+        }
+
+        protected override void ProcessPooledReceivedMessage()
+        {
+            MessageStruct messageData;
+            if (GetReceivedMessage(out messageData))
+            {
+                string msg = messageData.Message.ToString();
+                OnReceivedMessage?.Invoke(msg);
+                Executor.Instance.Execute(msg);
+            }
         }
 
         struct ServerConnectionJob : IJob

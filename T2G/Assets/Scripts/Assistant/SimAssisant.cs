@@ -251,7 +251,6 @@ public class SimAssistant : MonoBehaviour
         var gameDesc = _GameDescForm.GetGameDesc();
         var gameDescJson = JsonParser.Serialize(gameDesc);
         GenerateGameAsync(gameDesc, gameDescJson);
-    
         return 0;
     }
 

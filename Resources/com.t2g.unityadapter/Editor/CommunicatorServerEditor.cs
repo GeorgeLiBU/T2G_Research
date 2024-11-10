@@ -88,11 +88,6 @@ namespace T2G.UnityAdapter
             communicatorServer.OnReceivedMessage += (message) =>
             {
                 AddConsoleText("\n Received> " + message);
-                if(Executor.Instance.Execute(message))
-                {
-                    CommunicatorServer.Instance.SendMessage("Done!");
-                }
-                CommunicatorServer.Instance.GetReceivedMessage(out var messageData);  //Remove message from the pool
             };
 
             communicatorServer.OnSentMessage += (message) =>

@@ -337,7 +337,7 @@ namespace T2G.UnityAdapter
             }
         }
 
-        protected void ProcessPooledReceivedMessage()
+        protected virtual void ProcessPooledReceivedMessage()
         {
             MessageStruct messageData;
             if(GetReceivedMessage(out messageData))

@@ -110,7 +110,6 @@ namespace T2G.UnityAdapter
         {
             if (message.Substring(0, 4).CompareTo("INS>") == 0)
             {
-
                 var commandTuple = ParseInstruction(message.Substring(4));
                 var command = new ScriptCommand(commandTuple.command, commandTuple.arguments);
                 Execute(command);
@@ -121,7 +120,14 @@ namespace T2G.UnityAdapter
 
         public static void RespondCompletion(bool succeeded)
         {
-            CommunicatorServer.Instance.SendMessage("Done!");
+            if (succeeded)
+            {
+                CommunicatorServer.Instance.SendMessage("Done!");
+            }
+            else
+            {
+                CommunicatorServer.Instance.SendMessage("Failed!");
+            }
         }
     }
 }
