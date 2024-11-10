@@ -194,7 +194,7 @@ namespace T2G.UnityAdapter
                     }
                 }
 
-                comm.SendPooledMessege();
+                comm.SendPooledMessege(ref SendPool);
             }
         }
     }

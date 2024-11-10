@@ -16,13 +16,21 @@ namespace T2G.UnityAdapter
             {
                 Directory.CreateDirectory(scenesPath);
             }
-            string sceneFile = Path.Combine(scenesPath, command.Arguments[0], "unity");
-            EditorSceneManager.newSceneCreated += (scene, swtup, mode) =>
+            string sceneFile = Path.Combine(scenesPath, command.Arguments[0] + ".unity");
+            if (File.Exists(sceneFile))
             {
-                bool succeeded = EditorSceneManager.SaveScene(scene, sceneFile);
-                Executor.RespondCompletion(succeeded);
-            };
-            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                EditorSceneManager.LoadScene(sceneFile, LoadSceneMode.Single);
+                Executor.RespondCompletion(true);
+            }
+            else
+            {
+                EditorSceneManager.newSceneCreated += (scene, setup, mode) =>
+                {
+                    bool succeeded = EditorSceneManager.SaveScene(scene, sceneFile);
+                    Executor.RespondCompletion(succeeded);
+                };
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            }
         }
 
         private void HandleCreateObject(ScriptCommand command)

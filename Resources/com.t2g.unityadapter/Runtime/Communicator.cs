@@ -314,6 +314,27 @@ namespace T2G.UnityAdapter
             }
         }
 
+        protected virtual void SendPooledMessege(ref NativeArray<MessageStruct> SendPool)
+        {
+            if (_sendPoolHead != _sendPoolTail)
+            {
+                var sendMessage = SendPool[_sendPoolTail++];
+                if (_sendPoolTail >= SendMessagePoolSize)
+                {
+                    _sendPoolTail = 0;
+                }
+
+                if (sendMessage.Message.Length <= MaxMessageLength)
+                {
+                    _networkDriver.BeginSend(_networkpipeline, _connections[0], out var writer);
+                    writer.WriteInt((int)(sendMessage.Type));
+                    writer.WriteFixedString4096(sendMessage.Message);
+                    _networkDriver.EndSend(writer);
+                    OnSentMessage?.Invoke(sendMessage.Message.ToString());
+                }
+            }
+        }
+
         protected void ProcessPooledReceivedMessage()
         {
             MessageStruct messageData;
