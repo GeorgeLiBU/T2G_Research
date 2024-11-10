@@ -194,7 +194,7 @@ namespace T2G.UnityAdapter
                     }
                 }
 
-                comm.SendPooledMessege(ref SendPool);
+                comm.SendPooledMessege(ref SendPool, ref Connections, ref Driver);
             }
         }
     }

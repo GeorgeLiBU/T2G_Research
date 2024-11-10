@@ -19,8 +19,10 @@ namespace T2G.UnityAdapter
             string sceneFile = Path.Combine(scenesPath, command.Arguments[0] + ".unity");
             if (File.Exists(sceneFile))
             {
-                EditorSceneManager.LoadScene(sceneFile, LoadSceneMode.Single);
-                Executor.RespondCompletion(true);
+                EditorSceneManager.sceneOpened += (scene, mode) => {
+                    Executor.RespondCompletion(true);
+                };
+                EditorSceneManager.OpenScene(sceneFile, OpenSceneMode.Single);
             }
             else
             {

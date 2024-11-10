@@ -314,7 +314,9 @@ namespace T2G.UnityAdapter
             }
         }
 
-        protected virtual void SendPooledMessege(ref NativeArray<MessageStruct> SendPool)
+        protected virtual void SendPooledMessege(ref NativeArray<MessageStruct> SendPool, 
+            ref NativeArray<NetworkConnection> Connections, 
+            ref NetworkDriver Driver)
         {
             if (_sendPoolHead != _sendPoolTail)
             {
@@ -326,10 +328,10 @@ namespace T2G.UnityAdapter
 
                 if (sendMessage.Message.Length <= MaxMessageLength)
                 {
-                    _networkDriver.BeginSend(_networkpipeline, _connections[0], out var writer);
+                    Driver.BeginSend(_networkpipeline, Connections[0], out var writer);
                     writer.WriteInt((int)(sendMessage.Type));
                     writer.WriteFixedString4096(sendMessage.Message);
-                    _networkDriver.EndSend(writer);
+                    Driver.EndSend(writer);
                     OnSentMessage?.Invoke(sendMessage.Message.ToString());
                 }
             }
