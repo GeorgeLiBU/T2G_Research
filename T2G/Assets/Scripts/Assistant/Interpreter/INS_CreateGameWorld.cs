@@ -10,7 +10,7 @@ public partial class Interpreter
         if (IsNotEmptyString(worldName))
         {
             _instructions.Add($"CREATE_WORLD {worldName} -BOOTSTRAP {isBootstrap} -GRAVITY {gravity}");
-            worldName = StripOffQuotes(worldName);
+            worldName = worldName.Trim('"');
             return true;
         }
         return false;

@@ -1,75 +1,39 @@
 using System;
+using System.IO;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public partial class Executor
+namespace T2G.UnityAdapter
 {
-    private void HandleCreateWorld(ScriptCommand command)
+
+    public partial class Executor
     {
-        string objectName = command.Arguments[0].Trim('"');
-        string sceneName = command.Arguments[2].Trim('"');
-        string[] positionParts = command.Arguments[4].Trim('(', ')').Split(',');
-
-        float x = float.Parse(positionParts[0].Split(':')[1]);
-        float y = float.Parse(positionParts[1].Split(':')[1]);
-        float z = float.Parse(positionParts[2].Split(':')[1]);
-
-        // In Unity, you might use:
-        GameObject prefab = Resources.Load<GameObject>(objectName);
-        if (prefab != null)
+        private void HandleCreateWorld(ScriptCommand command)
         {
-            GameObject instance = GameObject.Instantiate(prefab, new Vector3(x, y, z), Quaternion.identity);
-            Debug.Log($"{objectName} added to scene {sceneName} at position ({x}, {y}, {z})");
-        }
-        else
-        {
-            Debug.LogError($"Prefab {objectName} not found.");
-        }
-    }
-
-    private void HandleCreateObject(ScriptCommand command)
-    {
-        string objectName = command.Arguments[0].Trim('"');
-        string componentName = command.Arguments[2].Trim('"');
-        string propertyName = command.Arguments[4].Trim('"');
-        string propertyValue = command.Arguments[6];
-
-        GameObject obj = GameObject.Find(objectName);
-        if (obj != null)
-        {
-            Component component = obj.GetComponent(componentName);
-            if (component != null)
+            string scenesPath = Path.Combine(Application.dataPath, "Scenes");
+            if (!Directory.Exists(scenesPath))
             {
-                var property = component.GetType().GetProperty(propertyName);
-                if (property != null)
-                {
-                    object convertedValue = Convert.ChangeType(propertyValue, property.PropertyType);
-                    property.SetValue(component, convertedValue);
-                    Debug.Log($"Set {propertyName} of {objectName}'s {componentName} to {propertyValue}");
-                }
-                else
-                {
-                    Debug.LogError($"Property {propertyName} not found in {componentName}");
-                }
+                Directory.CreateDirectory(scenesPath);
             }
-            else
+            string sceneFile = Path.Combine(scenesPath, command.Arguments[0], "unity");
+            EditorSceneManager.newSceneCreated += (scene, swtup, mode) =>
             {
-                Debug.LogError($"Component {componentName} not found in {objectName}");
-            }
+                bool succeeded = EditorSceneManager.SaveScene(scene, sceneFile);
+                Executor.RespondCompletion(succeeded);
+            };
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         }
-        else
+
+        private void HandleCreateObject(ScriptCommand command)
         {
-            Debug.LogError($"Object {objectName} not found.");
+
+        }
+
+        private void HandleAddOn(ScriptCommand command)
+        {
+
         }
     }
 
-    private void HandleAddOn(ScriptCommand command)
-    {
-        string timeOfDay = command.Arguments[0].Trim('"');
-        string timeValue = command.Arguments[2].Trim('"');
-
-        // In Unity, you'd probably control the sky settings via an environment controller.
-        Debug.Log($"Sky time set to {timeOfDay} at {timeValue}");
-        // Add actual environment-changing code here.
-    }
 }
-

@@ -30,7 +30,7 @@ public partial class Interpreter
             sb.Append($" -PREFAB {prefab}");
         }
         _instructions.Add(sb.ToString());
-        objectName = StripOffQuotes(objectName);
+        objectName = objectName.Trim('"');
         return true;
     }
    

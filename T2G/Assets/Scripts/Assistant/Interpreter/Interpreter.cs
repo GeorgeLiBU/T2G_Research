@@ -109,13 +109,4 @@ public partial class Interpreter
     {
         return !(string.IsNullOrWhiteSpace(strToCheck) || string.Compare(strToCheck, "\"\"") == 0);
     }
-
-    public static string StripOffQuotes(string strToProcess)
-    {
-        if(strToProcess.Substring(0, 1) == "\"" && strToProcess.Substring(strToProcess.Length - 1, 1) == "\"")
-        {
-            return strToProcess.Substring(1, strToProcess.Length - 2);
-        }
-        return strToProcess;
-    }
 }

@@ -278,6 +278,21 @@ namespace T2G.UnityAdapter
             return true;
         }
 
+        protected bool PoolReceivedMessage(MessageStruct messageData, ref NativeArray<MessageStruct> ReceivePool)
+        {
+            if (IsReceivingPoolFull)
+            {
+                OnSystemError?.Invoke("The receiving pool is full!");
+                return false;
+            }
+            ReceivePool[_receivePoolHead++] = messageData;
+            if (_receivePoolHead == ReceivePool.Length)
+            {
+                _receivePoolHead = 0;
+            }
+            return true;
+        }
+
         protected virtual void SendPooledMessege()
         {
             if (_sendPoolHead != _sendPoolTail)

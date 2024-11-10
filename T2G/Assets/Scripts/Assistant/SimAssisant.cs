@@ -178,21 +178,28 @@ public class SimAssistant : MonoBehaviour
         return true;
     }
 
-    async Task GenerateGameAsync(GameDesc gameDesc, string gameDescJson, bool skipGeneratingProject = false)
+    async Task GenerateGameAsync(GameDesc gameDesc, string gameDescJson)
     {
-        ConsoleController console = ConsoleController.Instance;
-        await CreateProjectFromGameDesc(gameDesc);
-        console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was created. initilaizing the project ...");
-        await InitProject(gameDesc);
-        console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was initialized, opening the project in ...");
-        await OpenProject(gameDesc);
-        bool connected = await Connect();
-        if(!connected)
+        string currentPrj = PlayerPrefs.GetString(Defs.k_ProjectPathname, string.Empty);
+        string generatPrj = gameDesc.GetProjectPathName();
+        bool skipCreatingProject = CommunicatorClient.Instance.IsConnected && (currentPrj.CompareTo(generatPrj) == 0);
+        if (!skipCreatingProject)
         {
-            console.WriteConsoleMessage(ConsoleController.eSender.Error, "Connection to the game project has timed out! ");
-            return;
+            ConsoleController console = ConsoleController.Instance;
+            await CreateProjectFromGameDesc(gameDesc);
+            console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was created. initilaizing the project ...");
+            await InitProject(gameDesc);
+            console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was initialized, opening the project in ...");
+            await OpenProject(gameDesc);
+
+            bool connected = await Connect();
+            if (!connected)
+            {
+                console.WriteConsoleMessage(ConsoleController.eSender.Error, "Connection to the game project has timed out! ");
+                return;
+            }
+            console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was opened and connected!");
         }
-        console.WriteConsoleMessage(ConsoleController.eSender.Assistant, "Project was opened and connected!");
 
         string[] instructions = Interpreter.Interpret(gameDescJson);
 
@@ -243,11 +250,8 @@ public class SimAssistant : MonoBehaviour
 
         var gameDesc = _GameDescForm.GetGameDesc();
         var gameDescJson = JsonParser.Serialize(gameDesc);
-
-        Task generateTask = new Task(async () => { await GenerateGameAsync(gameDesc, gameDescJson, CommunicatorClient.Instance.IsConnected); });
-        generateTask.Start();
-        generateTask.Wait();
-        
+        GenerateGameAsync(gameDesc, gameDescJson);
+    
         return 0;
     }
 

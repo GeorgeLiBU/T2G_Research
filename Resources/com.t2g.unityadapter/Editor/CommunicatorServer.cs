@@ -183,7 +183,7 @@ namespace T2G.UnityAdapter
                                 }
                                 break;
                             default:
-                                comm.PoolReceivedMessage(receivedMessage);
+                                comm.PoolReceivedMessage(receivedMessage, ref ReceivePool);
                                 break;
                         }
                     }

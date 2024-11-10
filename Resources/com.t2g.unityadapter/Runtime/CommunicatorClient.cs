@@ -167,7 +167,7 @@ namespace T2G.UnityAdapter
                             Message = readStream.ReadFixedString4096()
                         };
 
-                        comm.PoolReceivedMessage(receivedMessage);
+                        comm.PoolReceivedMessage(receivedMessage, ref ReceivePool);
                     }
                     else if (command == NetworkEvent.Type.Connect)  //Connected
                     {
