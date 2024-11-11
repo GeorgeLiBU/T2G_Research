@@ -52,10 +52,8 @@ namespace T2G.UnityAdapter
             {
                 throw new ArgumentException("Input cannot be null or whitespace.");
             }
-
             // Regular expression to match the command and arguments
             var matches = Regex.Matches(instruction, @"[\""].+?[\""]|[^ ]+");
-
             if (matches.Count == 0)
             {
                 throw new ArgumentException("No command found in input.");
@@ -64,14 +62,13 @@ namespace T2G.UnityAdapter
             var command = matches[0].Value.Trim('"');
             var arguments = new List<string>();
 
-            for (int i = 1; i < matches.Count; i++)
+            for (int i = 1; i < matches.Count; ++i)
             {
                 arguments.Add(matches[i].Value.Trim('"'));
             }
 
             return (command, arguments);
         }
-
 
         Dictionary<string, Action<ScriptCommand>> _commandHandlers;
 

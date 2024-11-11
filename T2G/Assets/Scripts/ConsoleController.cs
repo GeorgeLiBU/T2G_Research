@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 using T2G.UnityAdapter;
+using UnityEditor;
 
 public class ConsoleController : MonoBehaviour
 {
@@ -91,7 +92,7 @@ public class ConsoleController : MonoBehaviour
 
     void Start()
     {
-        _rectTransform = (RectTransform)transform;
+         _rectTransform = (RectTransform)transform;
 
         _consoleSizeIndex = PlayerPrefs.GetInt(k_ConsoleSizeIndex, 1);
         ResizeConsole();
