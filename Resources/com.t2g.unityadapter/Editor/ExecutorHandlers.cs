@@ -11,12 +11,13 @@ namespace T2G.UnityAdapter
 {
     public partial class Executor
     {
+        List<ScriptCommand> _scriptCommandBuffer = new List<ScriptCommand>();
+
         private void HandleCreateWorld(ScriptCommand command)
         {
             Action<string, List<string>> setupWorld = (sceneFile, args) => { 
                 for(int i = 1; i < args.Count - 1; i += 2)
                 {
-                    Debug.Log($"{i}: {args[i]}, {args[i + 1]}");
                     if(args[i].CompareTo("-GRAVITY") == 0 && float.TryParse(args[i + 1], out var gravity))
                     {
                         Physics.gravity = Vector3.up * gravity;
@@ -87,13 +88,58 @@ namespace T2G.UnityAdapter
 
         private void HandleCreateObject(ScriptCommand command)
         {
-
+            var args = command.Arguments;
+            string objName = args[0].Trim('"');
+            Debug.Log($"Object: {objName}");
+            Vector3 pos = Vector3.zero, rot = Vector3.zero, scale = Vector3.one;
+            GameObject newObject = null;
+            for (int i = 1; i < command.Arguments.Count; i += 2)
+            {
+                Debug.Log($"{i}: {args[i]}, {args[i + 1]}");
+                if (args[i].CompareTo("-WORLD") == 0)
+                {
+                    string worldName = args[i].Trim('"');
+                    if (EditorSceneManager.GetActiveScene().name.CompareTo(worldName) != 0)
+                    {
+                        string worldPathFile = Path.Combine(Application.dataPath, worldName + ".unity");
+                        if(File.Exists(worldPathFile))
+                        {
+                            EditorSceneManager.OpenScene(worldPathFile);
+                        }
+                        else
+                        {
+                            _scriptCommandBuffer.Add(command);
+                            continue;
+                        }
+                    }
+                }
+                if (args[i].CompareTo("-POSITION") == 0)
+                {
+                    float[] fValues = ParseFloat3(args[i + 1]);
+                    pos = new Vector3(fValues[0], fValues[1], fValues[2]);
+                }
+                if (args[i].CompareTo("-ROTATION") == 0)
+                {
+                    float[] fValues = ParseFloat3(args[i + 1]);
+                    rot = new Vector3(fValues[0], fValues[1], fValues[2]);
+                }
+                if (args[i].CompareTo("-SCALE") == 0)
+                {
+                    float[] fValues = ParseFloat3(args[i + 1]);
+                    scale = new Vector3(fValues[0], fValues[1], fValues[2]);
+                }
+            }
+            var newObj = new GameObject(objName);
+            newObj.transform.position = pos;
+            newObj.transform.Rotate(rot);
+            newObj.transform.localScale = scale;
         }
 
         private void HandleAddOn(ScriptCommand command)
         {
 
         }
+
     }
 
 }

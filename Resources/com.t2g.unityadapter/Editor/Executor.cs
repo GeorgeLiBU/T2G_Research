@@ -76,11 +76,11 @@ namespace T2G.UnityAdapter
         {
             // Initialize the dictionary with supported commands.
             _commandHandlers = new Dictionary<string, Action<ScriptCommand>>
-        {
-            { "CREATE_WORLD", HandleCreateWorld },
-            { "CREATE_OBJECT", HandleCreateObject },
-            { "ADDON", HandleAddOn }
-        };
+            {
+                { "CREATE_WORLD", HandleCreateWorld },
+                { "CREATE_OBJECT", HandleCreateObject },
+                { "ADDON", HandleAddOn }
+            };
         }
 
         private void Execute(List<ScriptCommand> commands)

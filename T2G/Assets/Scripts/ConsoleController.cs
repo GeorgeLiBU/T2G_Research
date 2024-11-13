@@ -201,6 +201,12 @@ public class ConsoleController : MonoBehaviour
         }
     }
 
+    public void Clear()
+    {
+        _messagePool.Clear();
+        _ConsoleDisplay.text = string.Empty;
+    }
+
     public void WriteConsoleMessage(eSender sender, string message)
     {
         string senderPrompt = string.Empty;

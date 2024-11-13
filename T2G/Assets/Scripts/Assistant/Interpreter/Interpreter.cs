@@ -101,7 +101,6 @@ public partial class Interpreter
             Interpret(gameWorlds);
         }
 
-
         return true;
     }
 

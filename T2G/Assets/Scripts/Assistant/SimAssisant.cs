@@ -218,15 +218,22 @@ public class SimAssistant : MonoBehaviour
 
     async Task<int> SendInstruction(string instruction, float timeout = 10.0f)
     {
+        string receivedMessage = string.Empty;
+        Action<string> waitForResponse = (message) =>
+        {
+            receivedMessage = message;
+        };
+        CommunicatorClient.Instance.OnReceivedMessage += waitForResponse;
         if(CommunicatorClient.Instance.SendMessage($"INS>{instruction}"))
         {
             ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.Assistant, $"Instruction>{instruction}");
         }
-        while(!CommunicatorClient.Instance.GetReceivedMessage(out var response))
+        while(string.IsNullOrEmpty(receivedMessage))
         {
             if(!CommunicatorClient.Instance.IsConnected)
             {
                 ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.System, "Desconnected!");
+                CommunicatorClient.Instance.OnReceivedMessage -= waitForResponse;
                 return 1;
             }
             await Task.Delay(100);
@@ -234,9 +241,11 @@ public class SimAssistant : MonoBehaviour
             if(timeout <= 0.0f)
             {
                 ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.System, "Timeout!");
+                CommunicatorClient.Instance.OnReceivedMessage -= waitForResponse;
                 return 2;
             }
         }
+        CommunicatorClient.Instance.OnReceivedMessage -= waitForResponse;
         return 0;
     }
 
