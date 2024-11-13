@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -20,27 +22,29 @@ namespace T2G.UnityAdapter
             }
         }
 
-        public class ScriptCommand
+        Dictionary<string, ExecutionBase> _executionPool = new Dictionary<string, ExecutionBase>();
+
+        public class Instruction
         {
             public string Command { get; set; }
             public List<string> Arguments { get; set; }
 
-            public ScriptCommand(string command, List<string> arguments)
+            public Instruction(string command, List<string> arguments)
             {
                 Command = command;
                 Arguments = arguments;
             }
         }
 
-        private List<ScriptCommand> Parse(string[] instructions)
+        private List<Instruction> Parse(string[] instructions)
         {
-            List<ScriptCommand> commands = new List<ScriptCommand>();
+            List<Instruction> commands = new List<Instruction>();
 
             foreach (var instruction in instructions)
             {
                 var commandTuple = ParseInstruction(instruction);
 
-                commands.Add(new ScriptCommand(commandTuple.command, commandTuple.arguments));
+                commands.Add(new Instruction(commandTuple.command, commandTuple.arguments));
             }
 
             return commands;
@@ -70,36 +74,37 @@ namespace T2G.UnityAdapter
             return (command, arguments);
         }
 
-        Dictionary<string, Action<ScriptCommand>> _commandHandlers;
-
         public Executor()
         {
-            // Initialize the dictionary with supported commands.
-            _commandHandlers = new Dictionary<string, Action<ScriptCommand>>
+            var assembly = Assembly.GetExecutingAssembly();
+            var executionClasses = assembly.GetTypes()
+                .Where(type => type.IsClass && type.GetCustomAttributes(typeof(ExecutionAttribute), false).Any());
+         
+            foreach(var executionClass in executionClasses)
             {
-                { "CREATE_WORLD", HandleCreateWorld },
-                { "CREATE_OBJECT", HandleCreateObject },
-                { "ADDON", HandleAddOn }
-            };
-        }
-
-        private void Execute(List<ScriptCommand> commands)
-        {
-            foreach (var command in commands)
-            {
-                Execute(command);
+                var attribute = executionClass.GetCustomAttribute<ExecutionAttribute>();
+                var execution = Activator.CreateInstance(executionClass) as ExecutionBase;
+                _executionPool.Add(attribute.Instruction, execution);
             }
         }
 
-        private void Execute(ScriptCommand command)
+        private void Execute(List<Instruction> instructions)
         {
-            if (_commandHandlers.ContainsKey(command.Command))
+            foreach (var instruction in instructions)
             {
-                _commandHandlers[command.Command](command);
+                Execute(instruction);
+            }
+        }
+
+        private void Execute(Instruction instruction)
+        {
+            if(_executionPool.ContainsKey(instruction.Command))
+            {
+                _executionPool[instruction.Command].HandleExecution(instruction);
             }
             else
             {
-                Debug.LogWarning($"[Executor.Execute] Unrecognized command: {command.Command}");
+                Debug.LogWarning($"[Executor.Execute] Unrecognized command: {instruction.Command}");
             }
         }
 
@@ -108,23 +113,11 @@ namespace T2G.UnityAdapter
             if (message.Substring(0, 4).CompareTo("INS>") == 0)
             {
                 var commandTuple = ParseInstruction(message.Substring(4));
-                var command = new ScriptCommand(commandTuple.command, commandTuple.arguments);
+                var command = new Instruction(commandTuple.command, commandTuple.arguments);
                 Execute(command);
                 return true;
             }
             return false;
-        }
-
-        public static void RespondCompletion(bool succeeded)
-        {
-            if (succeeded)
-            {
-                CommunicatorServer.Instance.SendMessage("Done!");
-            }
-            else
-            {
-                CommunicatorServer.Instance.SendMessage("Failed!");
-            }
         }
     }
 }

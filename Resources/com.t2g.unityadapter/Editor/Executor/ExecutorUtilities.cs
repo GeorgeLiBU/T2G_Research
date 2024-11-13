@@ -4,6 +4,17 @@ namespace T2G.UnityAdapter
 {
     public partial class Executor
     {
+        public static void RespondCompletion(bool succeeded)
+        {
+            if (succeeded)
+            {
+                CommunicatorServer.Instance.SendMessage("Done!");
+            }
+            else
+            {
+                CommunicatorServer.Instance.SendMessage("Failed!");
+            }
+        }
         public static float[] ParseFloat3(string float3String)
         {
             float[] fValue = new float[3] { 0.0f, 0.0f, 0.0f };
