@@ -79,13 +79,14 @@ namespace T2G.UnityAdapter
             var assembly = Assembly.GetExecutingAssembly();
             var executionClasses = assembly.GetTypes()
                 .Where(type => type.IsClass && type.GetCustomAttributes(typeof(ExecutionAttribute), false).Any());
-         
             foreach(var executionClass in executionClasses)
             {
                 var attribute = executionClass.GetCustomAttribute<ExecutionAttribute>();
                 var execution = Activator.CreateInstance(executionClass) as ExecutionBase;
                 _executionPool.Add(attribute.Instruction, execution);
             }
+
+            ExecutionADDON.RegisterAddAddonExecutions();
         }
 
         private void Execute(List<Instruction> instructions)

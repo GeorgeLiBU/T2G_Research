@@ -132,6 +132,16 @@ public class GameDescForm : MonoBehaviour
 
     public GameDesc GetGameDesc()
     {
+        return _gameDesc;
+    }
+
+    public string GetGameDescJson()
+    {
+        return _InputJson.text;
+    }
+
+    public GameDesc GetGameDescBasics()
+    {
         _gameDesc.Name = _GameDescName.text;
         _gameDesc.Title = _GameTitle.text;
         _gameDesc.Genre = _Genre.options[_Genre.value].text;
@@ -146,7 +156,7 @@ public class GameDescForm : MonoBehaviour
 
     public void OnSave()
     {
-        var gameDesc = GetGameDesc();
+        var gameDesc = GetGameDescBasics();
         JsonParser.SerializeAndSave(gameDesc);
         PlayerPrefs.SetString(k_DefaultGameDescNameKey, gameDesc.Name);
     }
