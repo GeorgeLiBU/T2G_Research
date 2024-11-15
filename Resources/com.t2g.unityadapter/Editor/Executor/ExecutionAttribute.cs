@@ -19,6 +19,10 @@ namespace T2G.UnityAdapter
     {
         protected static GameObject s_currentObject = null;
         public ExecutionBase() {  }
+        public static void SetCurrentObject(GameObject gameObject)
+        {
+            s_currentObject = gameObject;
+        }
         public abstract void HandleExecution(Executor.Instruction instruction);
     }
 
