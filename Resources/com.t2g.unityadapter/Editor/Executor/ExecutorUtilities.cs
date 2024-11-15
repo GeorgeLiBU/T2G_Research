@@ -43,7 +43,7 @@ namespace T2G.UnityAdapter
             {
                 float4String = float4String.Substring(1, float4String.Length - 2);
                 var elements = float4String.Split(',');
-                if (elements.Length == 3)
+                if (elements.Length == 4)
                 {
                     for (int i = 0; i < 4; ++i)
                     {

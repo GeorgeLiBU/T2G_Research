@@ -175,15 +175,9 @@ namespace T2G.UnityAdapter
         public override void HandleExecution(Executor.Instruction instruction)
         {
             var argList = new List<string>(instruction.Arguments);
-            for (int i = 0; i < argList.Count; ++i)
-            {
-                Debug.LogWarning($"ins[{i}]: {instruction.Arguments[i]} --> arg[{i}]: {argList[i]}\n");
-            }
-
             string addonType = GetAddonType(ref argList);
             string worldName = GetWorldName(ref argList);
             string objectName = GetObjectName(ref argList);
-            Debug.LogWarning($"addon: type-{addonType}, world-{worldName}, object-{objectName}");
             if (!string.IsNullOrEmpty(worldName) && 
                 EditorSceneManager.GetActiveScene().name.CompareTo(worldName) != 0)
             {
