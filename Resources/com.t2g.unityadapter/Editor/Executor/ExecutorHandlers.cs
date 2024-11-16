@@ -7,7 +7,6 @@ using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace T2G.UnityAdapter
 {
@@ -27,7 +26,6 @@ namespace T2G.UnityAdapter
     [Execution("CREATE_WORLD")]
     public class ExecutionCreateWorld : ExecutionBase
     {
-
         public override void HandleExecution(Executor.Instruction instruction)
         {
             Action<string, List<string>> setupWorld = (sceneFile, args) => {
@@ -73,12 +71,18 @@ namespace T2G.UnityAdapter
                 }
             };
 
+            var activeScene = EditorSceneManager.GetActiveScene();
+            if (!string.IsNullOrEmpty(activeScene.name))
+            {
+                EditorSceneManager.SaveScene(activeScene);
+            }
+
             string scenesPath = Path.Combine(Application.dataPath, "Scenes");
             if (!Directory.Exists(scenesPath))
             {
                 Directory.CreateDirectory(scenesPath);
             }
-            EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
+            
             string sceneFile = Path.Combine(scenesPath, instruction.Arguments[0] + ".unity");
             if (File.Exists(sceneFile))
             {
@@ -202,7 +206,6 @@ namespace T2G.UnityAdapter
                 }
             }
 
-            Debug.Log($"Add addon: {addonType}");
             if(s_addonProcessor.ContainsKey(addonType))
             {
                 s_addonProcessor[addonType].AddAddon(s_currentObject, argList);

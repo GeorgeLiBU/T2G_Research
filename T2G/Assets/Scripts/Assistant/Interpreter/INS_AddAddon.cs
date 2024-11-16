@@ -84,7 +84,7 @@ public partial class Interpreter
                 sb.Append($" -SCRIPT {script}");
             }
         }
-        else if (addonType.CompareTo("Direcional Light") == 0)
+        else if (addonType.CompareTo("Directional Light") == 0)
         {
             var color = jsonObj.GetValueOrDefault("Color", "[1, 1, 1]").ToString().Trim('"');
             var intensity = jsonObj.GetValueOrDefault("Intensity", "1").ToString().Trim('"');

@@ -63,7 +63,6 @@ namespace T2G.UnityAdapter
                 if (properties[i].CompareTo("-COLOR") == 0)
                 {
                     var values = Executor.ParseFloat3(properties[i + 1]);
-                    Debug.LogWarning($"values = {values[0]}, {values[1]}, {values[2]}, {values[3]}");
                     light.color = new Color(values[0], values[1], values[2]);
                 }
                 if (properties[i].CompareTo("-INTENSITY") == 0 && float.TryParse(properties[i + 1], out var intensity))
@@ -90,9 +89,12 @@ namespace T2G.UnityAdapter
             GameObject primitiveObject = null;
             for (int i = 0; i < properties.Count - 1; i += 2)
             {
-                if (properties[i].CompareTo("-PRIMITIVE_TYPE") == 0 && float.TryParse(properties[i + 1], out var primitiveTypeName))
+                Debug.LogWarning($"Primitive{i}: {properties[i]}={properties[i+1]}");
+                if (properties[i].CompareTo("-PRIMITIVE_TYPE") == 0)
                 {
+                    var primitiveTypeName = properties[i + 1];
                     PrimitiveType primitiveType = PrimitiveType.Sphere;
+
                     if (primitiveTypeName.CompareTo("plane") == 0)
                     {
                         primitiveType = PrimitiveType.Plane;
@@ -104,6 +106,10 @@ namespace T2G.UnityAdapter
                     else if (primitiveTypeName.CompareTo("sphere") == 0)
                     {
                         primitiveType = PrimitiveType.Sphere;
+                    }
+                    else if (primitiveTypeName.CompareTo("quad") == 0)
+                    {
+                        primitiveType = PrimitiveType.Quad;
                     }
                     primitiveObject = GameObject.CreatePrimitive(primitiveType);
 
@@ -118,7 +124,7 @@ namespace T2G.UnityAdapter
             primitiveObject.transform.rotation = gameObject.transform.rotation;
             primitiveObject.transform.localScale = gameObject.transform.localScale * sizeScale;
             ExecutionBase.SetCurrentObject(primitiveObject);
-            GameObject.Destroy(gameObject);
+            GameObject.DestroyImmediate(gameObject);
             Executor.RespondCompletion(true);
         }
     }

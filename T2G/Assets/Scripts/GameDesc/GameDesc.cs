@@ -57,6 +57,7 @@ public class SampleGameDescLibrary
         //Camera
         gameDesc.GameWorlds[0].Objects[0] = new WorldObject();
         gameDesc.GameWorlds[0].Objects[0].Name = "MainCamera";
+        gameDesc.GameWorlds[0].Objects[0].Position = new float[3] { 0.0f, 2.0f, 0.0f };
         gameDesc.GameWorlds[0].Objects[0].Addons = new Addon[2];
         PerspectiveCamera camera = new PerspectiveCamera();
         camera.NearClipPlane = 1.0f;
@@ -234,13 +235,13 @@ public class DirectionalLight : Addon
     public float Intensity = 1.0f;
     public DirectionalLight()
     {
-        AddonType = "DirecionalLight";
+        AddonType = "Directional Light";
     }
 }
 
 public class Primitive : Addon
 {
-    public string PrimitiveType = "cube";  //cube, sphere, plane, quade
+    public string PrimitiveType = "cube";  //cube, sphere, plane, quad
     public float SizeScale = 1.0f;
     public Primitive()
     {
