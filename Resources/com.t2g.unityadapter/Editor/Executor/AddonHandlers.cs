@@ -1,5 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEditor;
 
 namespace T2G.UnityAdapter
 {
@@ -35,9 +39,7 @@ namespace T2G.UnityAdapter
                 if (properties[i].CompareTo("-VIEWPORT_RECT") == 0)
                 {
                     var values = Executor.ParseFloat4(properties[i + 1]);
-                    Debug.LogWarning($"values = {values[0]}, {values[1]}, {values[2]}, {values[3]}");
                     camera.rect = new Rect(values[0], values[1], values[2], values[3]);
-                    Debug.LogWarning($"Rect Property value = {values}");
                 }
             }
             Executor.RespondCompletion(true);
@@ -89,7 +91,6 @@ namespace T2G.UnityAdapter
             GameObject primitiveObject = null;
             for (int i = 0; i < properties.Count - 1; i += 2)
             {
-                Debug.LogWarning($"Primitive{i}: {properties[i]}={properties[i+1]}");
                 if (properties[i].CompareTo("-PRIMITIVE_TYPE") == 0)
                 {
                     var primitiveTypeName = properties[i + 1];
@@ -129,34 +130,94 @@ namespace T2G.UnityAdapter
         }
     }
 
+    class AddonAssetPostprocessor : AssetPostprocessor
+    {
+        public static Action CompletedCallback = null;
+
+        static void OnPostprocessAllAssets(string[] importedAssets,
+            string[] deletedAssets,
+            string[] movedAssets,
+            string[] movedFromAssetPaths,
+            bool didDomainReload)
+        {
+            //This function may be called multiple times.
+            //Check didDomainReload to ensure it is fully completed
+            if (didDomainReload)  
+            {
+                CompletedCallback?.Invoke();
+            }
+        }
+    }
+
     [AddAddon("Script")]
     public class AddScript : AddAddonBase
     {
-        public override void AddAddon(GameObject gameObject, List<string> properties)
+        public override void AddAddon(GameObject gameObject, List<string> argList)
         {
             if (gameObject == null)
             {
                 Executor.RespondCompletion(false);
-                return;
             }
+            else
+            {
+                var scriptName = Executor.GetPropertyValue("-SCRIPT", ref argList);
+                var dependencies = Executor.GetPropertyValue("-DEPENDENCIES", ref argList);
+                AddonAssetPostprocessor.CompletedCallback = () =>
+                {
+                    var scriptClassName = Executor.GetScriptClassName(scriptName);
+                    Debug.LogWarning($"5. scriptClassName: {scriptClassName}");
+                    var type = Type.GetType(scriptClassName);
+                    var component = gameObject.AddComponent(type);
+                    var properties = type.GetProperties();
+                    foreach (var property in properties)
+                    {
+                        var propertyValue = Executor.GetPropertyValue(property.Name, ref argList);
+                        Debug.LogWarning($"6. property: {property.Name}; property type: {property.PropertyType.ToString()}");
+                        if (!string.IsNullOrEmpty(propertyValue))
+                        {
+                            if (property.PropertyType == typeof(string))
+                            {
+                                property.SetValue(gameObject, propertyValue);
+                            }
+                            else if (property.PropertyType == typeof(float))
+                            {
+                                property.SetValue(gameObject, float.Parse(propertyValue));
+                            }
+                            else if (property.PropertyType == typeof(int))
+                            {
+                                property.SetValue(gameObject, int.Parse(propertyValue));
+                            }
+                            else if (property.PropertyType == typeof(bool))
+                            {
+                                property.SetValue(gameObject, bool.Parse(propertyValue));
+                            }
+                            else if (property.PropertyType == typeof(Vector3))
+                            {
+                                    //property.SetValue(gameObject, int.Parse(propertyValue));
+                                }
+                            else if (property.PropertyType == typeof(Vector2))
+                            {
+                                    //property.SetValue(gameObject, int.Parse(propertyValue));
+                                }
+                            else if (property.PropertyType == typeof(Vector4))
+                            {
+                                    //property.SetValue(gameObject, int.Parse(propertyValue));
+                                }
+                            else if (property.PropertyType == typeof(Color))
+                            {
+                                    //property.SetValue(gameObject, int.Parse(propertyValue));
+                                }
+                        }
+                    }
+                    AddonAssetPostprocessor.CompletedCallback = null;
+                    Executor.RespondCompletion(true);
+                };
 
-            //var light = gameObject.AddComponent<Light>();
-            //light.type = LightType.Directional;
-
-            //for (int i = 0; i < properties.Count - 1; i += 2)
-            //{
-            //    if (properties[i].CompareTo("-COLOR") == 0)
-            //    {
-            //        var values = Executor.ParseFloat3(properties[i + 1]);
-            //        Debug.LogWarning($"values = {values[0]}, {values[1]}, {values[2]}, {values[3]}");
-            //        light.color = new Color(values[0], values[1], values[2]);
-            //    }
-            //    if (properties[i].CompareTo("-INTENSITY") == 0 && float.TryParse(properties[i + 1], out var intensity))
-            //    {
-            //        light.intensity = intensity;
-            //    }
-            //}
-            Executor.RespondCompletion(true);
+                if (!ContentLibrary.ImportScript(scriptName, dependencies))
+                {
+                    Executor.RespondCompletion(false);
+                }
+            }
         }
     }
 
@@ -171,22 +232,6 @@ namespace T2G.UnityAdapter
                 return;
             }
 
-            //var light = gameObject.AddComponent<Light>();
-            //light.type = LightType.Directional;
-
-            //for (int i = 0; i < properties.Count - 1; i += 2)
-            //{
-            //    if (properties[i].CompareTo("-COLOR") == 0)
-            //    {
-            //        var values = Executor.ParseFloat3(properties[i + 1]);
-            //        Debug.LogWarning($"values = {values[0]}, {values[1]}, {values[2]}, {values[3]}");
-            //        light.color = new Color(values[0], values[1], values[2]);
-            //    }
-            //    if (properties[i].CompareTo("-INTENSITY") == 0 && float.TryParse(properties[i + 1], out var intensity))
-            //    {
-            //        light.intensity = intensity;
-            //    }
-            //}
             Executor.RespondCompletion(true);
         }
     }

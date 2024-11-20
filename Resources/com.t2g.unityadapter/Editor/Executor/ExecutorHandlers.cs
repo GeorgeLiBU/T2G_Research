@@ -216,47 +216,17 @@ namespace T2G.UnityAdapter
 
         string GetWorldName(ref List<string> argList)
         {
-            string worldName = string.Empty;
-            for (int i = 0; i < argList.Count - 1; i += 2)
-            {
-                if(argList[i].CompareTo("-WORLD") == 0)
-                {
-                    worldName = argList[i + 1];
-                    argList.RemoveRange(i, 2);
-                    break;
-                }
-            }
-            return worldName;
+            return Executor.GetPropertyValue("-WORLD", ref argList);
         }
 
         string GetObjectName(ref List<string> argList)
         {
-            string objectName = string.Empty;
-            for (int i = 0; i < argList.Count - 1; i += 2)
-            {
-                if (argList[i].CompareTo("-OBJECT") == 0)
-                {
-                    objectName = argList[i + 1];
-                    argList.RemoveRange(i, 2);
-                    break;
-                }
-            }
-            return objectName;
+            return Executor.GetPropertyValue("-OBJECT", ref argList);
         }
 
         string GetAddonType(ref List<string> argList)
         {
-            string addonType = string.Empty;
-            for (int i = 0; i < argList.Count - 1; i += 2)
-            {
-                if (argList[i].CompareTo("-TYPE") == 0)
-                {
-                    addonType = argList[i + 1];
-                    argList.RemoveRange(i, 2);
-                    break;
-                }
-            }
-            return addonType;
+            return Executor.GetPropertyValue("-TYPE", ref argList);
         }
     }
 }

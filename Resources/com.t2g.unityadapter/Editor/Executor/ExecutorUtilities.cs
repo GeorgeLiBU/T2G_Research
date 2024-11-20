@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace T2G.UnityAdapter
@@ -52,6 +53,36 @@ namespace T2G.UnityAdapter
                 }
             }
             return fValue;
+        }
+
+        public static string GetPropertyValue(string propertyName, ref List<string> argList, bool removePropert = true, int startIndex = 0)
+        {
+            string value = null;
+            if(!string.IsNullOrEmpty(propertyName) && argList != null && argList.Count > 0)
+            {
+                for(int i = startIndex; i < argList.Count - 1; i += 2)
+                {
+                    if(argList[i].CompareTo(propertyName) == 0)
+                    {
+                        value = argList[i + 1];
+                        if(removePropert)
+                        {
+                            argList.RemoveRange(i, 2);
+                        }
+                    }
+                }
+            }
+            return value;
+        }
+
+        public static string GetScriptClassName(string scriptName)
+        {
+            int idx = scriptName.IndexOf(".cs");
+            if(idx > 0)
+            {
+                scriptName = scriptName.Substring(0, idx);
+            }
+            return scriptName;
         }
     }
 }

@@ -35,53 +35,61 @@ public partial class Interpreter
                 sb.Append($" -VIEWPORT_RECT {viewportRect}");
             }
         }
-        else if (addonType.CompareTo("Third-person View Controller") == 0)
+        else if (addonType.CompareTo("Script") == 0)
         {
-            var offset = jsonObj.GetValueOrDefault("Offset", string.Empty).ToString().Trim('"');
-            var lookAtTarget = jsonObj.GetValueOrDefault("Target", string.Empty).ToString().Trim('"');
-            var script = jsonObj.GetValueOrDefault("Script", string.Empty).ToString();
-            if (!string.IsNullOrEmpty(offset))
+            var script = jsonObj.GetValueOrDefault("Script", string.Empty).ToString().Trim('"');
+            var dependencies = jsonObj.GetValueOrDefault("Dependencies", string.Empty).ToString().Trim('"');
+            if(!string.IsNullOrEmpty(dependencies))
             {
-                sb.Append($" -OFFSET {offset}");
+                sb.Append($" -DEPENDENCIES \"{dependencies}\"");
             }
-            if (!string.IsNullOrEmpty(lookAtTarget))
+
+            if (script.CompareTo("ThirdPersonCameraController.cs") == 0)
             {
-                sb.Append($" -TARGET {lookAtTarget}");
+                var offset = jsonObj.GetValueOrDefault("Offset", string.Empty).ToString().Trim('"');
+                var lookAtTarget = jsonObj.GetValueOrDefault("Target", string.Empty).ToString().Trim('"');
+
+                if (!string.IsNullOrEmpty(offset))
+                {
+                    sb.Append($" -OFFSET {offset}");
+                }
+                if (!string.IsNullOrEmpty(lookAtTarget))
+                {
+                    sb.Append($" -TARGET {lookAtTarget}");
+                }
+                if (!string.IsNullOrEmpty(script))
+                {
+                    sb.Append($" -SCRIPT {script}");
+                }
             }
-            if (!string.IsNullOrEmpty(script))
+            else if (script.CompareTo("FirstPersonCameraController.cs") == 0)
             {
-                sb.Append($" -SCRIPT {script}");
+                var viewOffset = jsonObj.GetValueOrDefault("ViewOffset", "[0, 0, 0]").ToString().Trim('"');
+                if (!string.IsNullOrEmpty(viewOffset))
+                {
+                    sb.Append($" -VIEW_OFFSET {viewOffset}");
+                }
+                if (!string.IsNullOrEmpty(script))
+                {
+                    sb.Append($" -SCRIPT {script}");
+                }
             }
-        }
-        else if (addonType.CompareTo("First-person View Controller") == 0)
-        {
-            var viewOffset = jsonObj.GetValueOrDefault("ViewOffset", "[0, 0, 0]").ToString().Trim('"');
-            var script = jsonObj.GetValueOrDefault("Script", string.Empty).ToString();
-            if (!string.IsNullOrEmpty(viewOffset))
+            else if (script.CompareTo("FirstAndThirdPersonCameraController.cs") == 0)
             {
-                sb.Append($" -VIEW_OFFSET {viewOffset}");
-            }
-            if (!string.IsNullOrEmpty(script))
-            {
-                sb.Append($" -SCRIPT {script}");
-            }
-        }
-        else if (addonType.CompareTo("Mixed First- and Third-person View Contoller") == 0)
-        {
-            var viewOffset = jsonObj.GetValueOrDefault("ViewOffset", "[0, 0, 0]").ToString().Trim('"');
-            var offset = jsonObj.GetValueOrDefault("Offset", "[0, 0, 0]").ToString().Trim('"');
-            var script = jsonObj.GetValueOrDefault("Script", string.Empty).ToString();
-            if (!string.IsNullOrEmpty(viewOffset))
-            {
-                sb.Append($" -VIEW_OFFSET {viewOffset}");
-            }
-            if (!string.IsNullOrEmpty(offset))
-            {
-                sb.Append($" -OFFSET {offset}");
-            }
-            if (!string.IsNullOrEmpty(script))
-            {
-                sb.Append($" -SCRIPT {script}");
+                var viewOffset = jsonObj.GetValueOrDefault("ViewOffset", "[0, 0, 0]").ToString().Trim('"');
+                var offset = jsonObj.GetValueOrDefault("Offset", "[0, 0, 0]").ToString().Trim('"');
+                if (!string.IsNullOrEmpty(viewOffset))
+                {
+                    sb.Append($" -VIEW_OFFSET {viewOffset}");
+                }
+                if (!string.IsNullOrEmpty(offset))
+                {
+                    sb.Append($" -OFFSET {offset}");
+                }
+                if (!string.IsNullOrEmpty(script))
+                {
+                    sb.Append($" -SCRIPT {script}");
+                }
             }
         }
         else if (addonType.CompareTo("Directional Light") == 0)

@@ -218,6 +218,20 @@ public class SimAssistant : MonoBehaviour
 
     async Task<int> SendInstruction(string instruction, float timeout = 10.0f)
     {
+        float timer = 0.0f;
+        float connectionTimeout = 30.0f;
+        while (!CommunicatorClient.Instance.IsConnected)
+        {
+            CommunicatorClient.Instance.StartClient(1.0f);
+            await Task.Delay(1000);
+            timer += 1.0f;
+            if(timer >= connectionTimeout)
+            {
+                ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.Error, "No connection!");
+                return 2;
+            }
+        }
+
         string receivedMessage = string.Empty;
         Action<string> waitForResponse = (message) =>
         {

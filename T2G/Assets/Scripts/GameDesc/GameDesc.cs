@@ -178,6 +178,11 @@ public class Addon
 public class ScriptAddon : Addon
 {
     public string Script = string.Empty;
+    public string Dependencies = string.Empty;
+    public ScriptAddon() 
+    {
+        AddonType = "Script";
+    }
 }
 
 public class ThirdPersonCameraController : ScriptAddon
@@ -185,10 +190,10 @@ public class ThirdPersonCameraController : ScriptAddon
     public float[] Offset = new float[3] { 0.0f, 3.0f, 5.0f }; 
     public string Target = string.Empty;
 
-    public ThirdPersonCameraController()
+    public ThirdPersonCameraController() : base()
     {
-        AddonType = "Third-person View Controller";
         Script = "ThirdPersonCameraController.cs";
+        Dependencies = "PlayerCameraController.cs,ObjectController.cs";
     }
 }
 
@@ -196,10 +201,10 @@ public class FirstPersonCameraController : ScriptAddon
 {
     public float[] ViewOffset = new float[3] { 0.0f, 1.8f, 0.0f };
 
-    public FirstPersonCameraController()
+    public FirstPersonCameraController() : base()
     {
-        AddonType = "First-person View Controller";
         Script = "FirstPersonCameraController.cs";
+        Dependencies = "PlayerCameraController.cs,ObjectController.cs";
     }
 }
 
@@ -209,10 +214,10 @@ public class MixedFirstAndThirdPersonCameraController : ScriptAddon
     public float[] ViewOffset = new float[3] { 0.0f, 1.8f, 0.0f };
     public string LookAtTarget;
 
-    public MixedFirstAndThirdPersonCameraController()
+    public MixedFirstAndThirdPersonCameraController() : base()
     {
-        AddonType = "Mixed First- and Third-person View Controller";
         Script = "MixedFirstAndThirdPersonCameraController.cs";
+        Dependencies = "PlayerCameraController.cs,ObjectController.cs";
     }
 }
 
