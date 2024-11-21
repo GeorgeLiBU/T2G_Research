@@ -10,14 +10,10 @@ public class ThirdPersonCameraController : PlayerCameraController
     private Transform _gunMuzzleTransform;
     private Transform _gunCrosshairTransform;
 
-    void Start()
+    protected override void Start()
     {
-        if (_PlayerTarget == null)
-        {
-            SetTargetByName("PlayerCharacter");
-        }
-
-        _ViewOffset = new Vector3(0.0f, 3.0f, -5.0f);
+        base.Start();
+        ViewOffset = new Vector3(0.0f, 3.0f, -5.0f);
     }
 
     void LateUpdate()
@@ -28,7 +24,7 @@ public class ThirdPersonCameraController : PlayerCameraController
    void LocateCamera()
     {
         Vector3 target = Vector3.zero;
-        target = _PlayerTarget.transform.rotation * _ViewOffset + _PlayerTarget.transform.position;
+        target = _PlayerTarget.transform.rotation * ViewOffset + _PlayerTarget.transform.position;
 
         transform.position = Vector3.SmoothDamp(
                 transform.position,

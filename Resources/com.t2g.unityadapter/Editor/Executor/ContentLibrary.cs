@@ -13,10 +13,8 @@ namespace T2G.UnityAdapter
             var sourcePath = Path.Combine(Settings.RecoursePath, "Scripts", scriptName);
             var destDir = Path.Combine(Application.dataPath, "Scripts");
             var destPath = Path.Combine(destDir, scriptName);
-            Debug.LogWarning($"source={sourcePath}; dest={destPath}");
             if (File.Exists(sourcePath))
             {
-                Debug.LogWarning($"source path exisits.");
                 if (File.Exists(destPath))
                 {
                     retVal = true;

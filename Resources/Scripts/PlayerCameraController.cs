@@ -2,24 +2,30 @@ using UnityEngine;
 
 public class PlayerCameraController : ObjectController
 {
-    [SerializeField] protected GameObject _PlayerTarget;
-    [SerializeField] protected Vector3 _ViewOffset = new Vector3(0.0f, 1.7f, 0.0f);
-    public void SetTargetByName(string targetName)
-    {
-        if (string.IsNullOrEmpty("targetName"))
-        {
-            _PlayerTarget = null;
-        }
-        else
-        {
-            _PlayerTarget = GameObject.Find(targetName);
-        }
-    }
+    public string TargetName { get; set; } = string.Empty;
+    public Vector3 ViewOffset { get; set; } = new Vector3(0.0f, 1.7f, 0.0f);
 
-    public void SetViewOffset(Vector3 viewOffset)
+    protected GameObject _PlayerTarget;
+
+    protected virtual void Start()
     {
-        _ViewOffset = viewOffset;
+        _PlayerTarget = GameObject.Find(TargetName);
     }
 
     public bool HasTarget => (_PlayerTarget != null);
+
+    public void SetTargetByName(string targetName)
+    {
+        if(string.IsNullOrEmpty(targetName))
+        {
+            return;
+        }
+        
+        GameObject foundObj = GameObject.Find(targetName);
+        if (foundObj != null)
+        {
+            TargetName = targetName;
+            _PlayerTarget = foundObj;
+        }
+    }
 }

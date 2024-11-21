@@ -19,13 +19,10 @@ public class FirstAndThirdPersonCameraController : PlayerCameraController
 
     private Vector3 _transitVel = Vector3.zero;
 
-    void Start()
+    protected override void Start()
     {
-        if (_PlayerTarget == null)
-        {
-            SetTargetByName("PlayerCharacter");
-        }
-        _ViewOffset = new Vector3(0.0f, 1.7f, 0.0f);
+        base.Start();
+        ViewOffset = new Vector3(0.0f, 1.7f, 0.0f);
     }
 
     private void Update()
@@ -53,7 +50,7 @@ public class FirstAndThirdPersonCameraController : PlayerCameraController
         switch (_cameraViewMode)
         {
             case ECameraViewMode.FirstPersonView:
-                target = _PlayerTarget.transform.position + _ViewOffset;
+                target = _PlayerTarget.transform.position + ViewOffset;
 
                 rotateCamera = () =>
                 {

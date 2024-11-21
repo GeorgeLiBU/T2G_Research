@@ -6,13 +6,10 @@ using UnityEngine;
 
 public class FirstPersonCameraController : PlayerCameraController
 {
-    private void Start()
+    protected override void Start()
     {
-        if (_PlayerTarget == null)
-        {
-            SetTargetByName("PlayerCharacter");
-        }
-        _ViewOffset = new Vector3(0.0f, 1.7f, 0.0f);
+        base.Start();
+        ViewOffset = new Vector3(0.0f, 1.7f, 0.0f);
     }
 
 
@@ -20,7 +17,7 @@ public class FirstPersonCameraController : PlayerCameraController
     {
         if (_PlayerTarget != null)
         {
-            transform.position = _PlayerTarget.transform.position + _ViewOffset;
+            transform.position = _PlayerTarget.transform.position + ViewOffset;
             transform.rotation = _PlayerTarget.transform.rotation;
         }
     }
