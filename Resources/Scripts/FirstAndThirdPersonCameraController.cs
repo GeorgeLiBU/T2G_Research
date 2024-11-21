@@ -11,8 +11,8 @@ public class FirstAndThirdPersonCameraController : PlayerCameraController
         ThirdPersonView
     }
 
-    [SerializeField] private Vector3 _ThirdPersonViewOffset = new Vector3(0.0f, 3.0f, -5.0f);
-    [SerializeField] private float _TransitionTime = 0.3f;
+    public Vector3 ThirdPersonViewOffset { get; set; }  = new Vector3(0.0f, 3.0f, -5.0f);
+    public float TransitionTime { get; set; } = 0.3f;
 
     private ECameraViewMode _cameraViewMode = ECameraViewMode.ThirdPersonView;
     public ECameraViewMode ViewMode => _cameraViewMode;
@@ -58,7 +58,7 @@ public class FirstAndThirdPersonCameraController : PlayerCameraController
                 };
                 break;
             case ECameraViewMode.ThirdPersonView:
-                target = _PlayerTarget.transform.rotation * _ThirdPersonViewOffset + _PlayerTarget.transform.position;
+                target = _PlayerTarget.transform.rotation * ThirdPersonViewOffset + _PlayerTarget.transform.position;
                 rotateCamera = () =>
                 {
                     transform.LookAt(_PlayerTarget.transform.position + Vector3.up * 2.0f);
@@ -77,7 +77,7 @@ public class FirstAndThirdPersonCameraController : PlayerCameraController
                 transform.position,
                 target,
                 ref _transitVel,
-                _TransitionTime);
+                TransitionTime);
         }
 
         if (rotateCamera != null)

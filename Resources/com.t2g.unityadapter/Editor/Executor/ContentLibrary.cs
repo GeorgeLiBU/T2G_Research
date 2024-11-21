@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace T2G.UnityAdapter
@@ -10,8 +11,9 @@ namespace T2G.UnityAdapter
         public static bool ImportScript(string scriptName, string dependencies)
         {
             bool retVal = true;
-            var sourcePath = Path.Combine(Settings.RecoursePath, "Scripts", scriptName);
-            var destDir = Path.Combine(Application.dataPath, "Scripts");
+            string scriptsFolderName = "Scripts";
+            var sourcePath = Path.Combine(Settings.RecoursePath, scriptsFolderName, scriptName);
+            var destDir = Path.Combine(Application.dataPath, scriptsFolderName);
             var destPath = Path.Combine(destDir, scriptName);
             if (File.Exists(sourcePath))
             {
@@ -26,19 +28,24 @@ namespace T2G.UnityAdapter
                         Directory.CreateDirectory(destDir);
                     }
                     File.Copy(sourcePath, destPath);
-                    var importPath = Path.Combine("Assets", "Scripts", scriptName);
+                    var importPath = Path.Combine("Assets", scriptsFolderName, scriptName);
                     var dependencyArray = dependencies.Split(',');
                     foreach (var dependency in dependencyArray)
                     {
-                        sourcePath = Path.Combine(Settings.RecoursePath, "Scripts", dependency);
-                        destPath = Path.Combine(Application.dataPath, "Scripts", dependency);
+                        sourcePath = Path.Combine(Settings.RecoursePath, scriptsFolderName, dependency);
+                        destPath = Path.Combine(Application.dataPath, scriptsFolderName, dependency);
                         if (File.Exists(sourcePath))
                         {
                             File.Copy(sourcePath, destPath);
                         }
                     }
                     AssetDatabase.Refresh();
-                    AssetDatabase.ImportAsset(importPath);
+                    CompilationPipeline.compilationFinished += (obj) =>
+                    {
+
+                    };
+                    CompilationPipeline.RequestScriptCompilation(RequestScriptCompilationOptions.CleanBuildCache);
+                    //CompilationPipeline.RequestScriptCompilation(RequestScriptCompilationOptions.None);
                 }
             }
             else
