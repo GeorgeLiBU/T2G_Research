@@ -216,10 +216,10 @@ public class SimAssistant : MonoBehaviour
             errorCode > 0 ? $"Game generation was interrupted. ErrorCode: {errorCode}" : "Game generation completed!");
     }
 
-    async Task<int> SendInstruction(string instruction, float timeout = 10.0f)
+    async Task<int> SendInstruction(string instruction, float timeout = 60.0f)
     {
         float timer = 0.0f;
-        float connectionTimeout = 30.0f;
+        float connectionTimeout = timeout;
         while (!CommunicatorClient.Instance.IsConnected)
         {
             CommunicatorClient.Instance.StartClient(1.0f);
@@ -238,28 +238,36 @@ public class SimAssistant : MonoBehaviour
             receivedMessage = message;
         };
         CommunicatorClient.Instance.OnReceivedMessage += waitForResponse;
-        if(CommunicatorClient.Instance.SendMessage($"INS>{instruction}"))
+        if (CommunicatorClient.Instance.SendMessage($"INS>{instruction}"))
         {
             ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.Assistant, $"Instruction>{instruction}");
-        }
-        while(string.IsNullOrEmpty(receivedMessage))
-        {
-            if(!CommunicatorClient.Instance.IsConnected)
+            timer = 0.0f;
+            while (string.IsNullOrEmpty(receivedMessage))
             {
-                ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.System, "Desconnected!");
-                CommunicatorClient.Instance.OnReceivedMessage -= waitForResponse;
-                return 1;
+                await Task.Delay(100);
+                timer += 0.1f;
+                if (!CommunicatorClient.Instance.IsConnected)
+                {
+                    CommunicatorClient.Instance.StartClient();  //try reconnecting silently
+                }
+                if (timer >= timeout)
+                {
+                    if (!CommunicatorClient.Instance.IsConnected)
+                    {
+                        ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.System, "Disconnected!");
+                        CommunicatorClient.Instance.OnReceivedMessage -= waitForResponse;
+                        return 1;
+                    }
+                    else
+                    {
+                        ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.System, "Timeout!");
+                        CommunicatorClient.Instance.OnReceivedMessage -= waitForResponse;
+                        return 2;
+                    }
+                }
             }
-            await Task.Delay(100);
-            timeout -= 0.1f;
-            if(timeout <= 0.0f)
-            {
-                ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.System, "Timeout!");
-                CommunicatorClient.Instance.OnReceivedMessage -= waitForResponse;
-                return 2;
-            }
+            CommunicatorClient.Instance.OnReceivedMessage -= waitForResponse;
         }
-        CommunicatorClient.Instance.OnReceivedMessage -= waitForResponse;
         return 0;
     }
 

@@ -1,6 +1,5 @@
 using System.IO;
 using UnityEditor;
-using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace T2G.UnityAdapter
@@ -40,12 +39,6 @@ namespace T2G.UnityAdapter
                         }
                     }
                     AssetDatabase.Refresh();
-                    CompilationPipeline.compilationFinished += (obj) =>
-                    {
-
-                    };
-                    CompilationPipeline.RequestScriptCompilation(RequestScriptCompilationOptions.CleanBuildCache);
-                    //CompilationPipeline.RequestScriptCompilation(RequestScriptCompilationOptions.None);
                 }
             }
             else

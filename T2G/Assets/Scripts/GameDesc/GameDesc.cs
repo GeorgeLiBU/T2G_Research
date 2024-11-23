@@ -84,8 +84,8 @@ public class SampleGameDescLibrary
         gameDesc.GameWorlds[0].Objects[2].Addons[0] = ground;
         //Play character
         gameDesc.GameWorlds[0].Objects[3] = new WorldObject();
-        gameDesc.GameWorlds[0].Objects[3].Name = "PlayerCharacter";
-        gameDesc.GameWorlds[0].Objects[3].Prefab = "Swat";
+        gameDesc.GameWorlds[0].Objects[3].Name = "Player";
+        gameDesc.GameWorlds[0].Objects[3].Prefab = "PlayerSwat";
         gameDesc.GameWorlds[0].Objects[3].Position = new float[3] { 0.0f, 0.0f, 10.0f };
         gameDesc.GameWorlds[0].Objects[3].Rotation = new float[3] { 0.0f, 0.0f, 0.0f };
 

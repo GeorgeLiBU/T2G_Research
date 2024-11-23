@@ -4,6 +4,7 @@ using System.IO;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.Compilation;
 
 namespace T2G.UnityAdapter
 {
@@ -210,7 +211,17 @@ namespace T2G.UnityAdapter
                         }
                     }
                     AddonAssetPostprocessor.CompletedCallback = null;
-                    Executor.RespondCompletion(true);
+
+                    Action<object> compilationCallback = null;
+                    compilationCallback = (obj) =>
+                    {
+                        CompilationPipeline.compilationFinished -= compilationCallback;
+                        Executor.RespondCompletion(true);
+                    };
+
+                    CompilationPipeline.compilationFinished += compilationCallback;
+                    //mpilationPipeline.RequestScriptCompilation(RequestScriptCompilationOptions.CleanBuildCache);
+                    CompilationPipeline.RequestScriptCompilation(RequestScriptCompilationOptions.None);
                 };
 
                 if (!ContentLibrary.ImportScript(scriptName, dependencies))
@@ -220,20 +231,4 @@ namespace T2G.UnityAdapter
             }
         }
     }
-
-    [AddAddon("Prefab")]
-    public class AddPrefab : AddAddonBase
-    {
-        public override void AddAddon(GameObject gameObject, List<string> properties)
-        {
-            if (gameObject == null)
-            {
-                Executor.RespondCompletion(false);
-                return;
-            }
-
-            Executor.RespondCompletion(true);
-        }
-    }
-
 }

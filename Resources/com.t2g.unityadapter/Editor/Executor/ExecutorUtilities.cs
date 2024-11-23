@@ -5,7 +5,7 @@ namespace T2G.UnityAdapter
 {
     public partial class Executor
     {
-        public static void RespondCompletion(bool succeeded, int code = 0)   
+        public static void RespondCompletion(bool succeeded, int code = 0)
             //Succeeded=[true: code=0(completed), code=1(postponed)]; [false: failed]
         {
             if (succeeded)

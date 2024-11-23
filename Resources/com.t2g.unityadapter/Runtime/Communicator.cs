@@ -47,6 +47,7 @@ namespace T2G.UnityAdapter
     [Serializable]
     public class Settings
     {
+        public static bool Loaded { get; private set; } = false;
         public static string UnityEditorPath;
         public static string RecoursePath;
         public static string User;
@@ -77,6 +78,7 @@ namespace T2G.UnityAdapter
             {
                 Save();
             }
+            Loaded = true;
         }
 
         public static void Load()
@@ -85,6 +87,7 @@ namespace T2G.UnityAdapter
             RecoursePath = PlayerPrefs.GetString(Defs.k_ResourcePath, string.Empty);
             User = PlayerPrefs.GetString(Defs.k_UserName, "You");
             Assistant = PlayerPrefs.GetString(Defs.k_AssistantName, "Assistant");
+            Loaded = true;
         }
 
         public static void Save()

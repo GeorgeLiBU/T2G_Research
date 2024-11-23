@@ -114,6 +114,7 @@ namespace T2G.UnityAdapter
             var args = instruction.Arguments;
             string objName = args[0].Trim('"');
             Vector3 pos = Vector3.zero, rot = Vector3.zero, scale = Vector3.one;
+            string prefab = null;
             s_currentObject = null;
             for (int i = 1; i < instruction.Arguments.Count; i += 2)
             {
@@ -149,13 +150,69 @@ namespace T2G.UnityAdapter
                     float[] fValues = Executor.ParseFloat3(args[i + 1]);
                     scale = new Vector3(fValues[0], fValues[1], fValues[2]);
                 }
+                if(args[i].CompareTo("-PREFAB") == 0)
+                {
+                    prefab = args[i + 1].Trim('"');
+                }
             }
+
             s_currentObject = new GameObject(objName);
             s_currentObject.transform.position = pos;
             s_currentObject.transform.Rotate(rot);
             s_currentObject.transform.localScale = scale;
-            Executor.RespondCompletion(true);
+
+            if (string.IsNullOrEmpty(prefab))
+            {
+                Executor.RespondCompletion(true);
+            }
+            else
+            {
+                ImportPackage(prefab);
+            }
         }
+
+        static void ImportPackageCompletedHanddler(string packageName)
+        {
+            string package = Path.GetFileName(packageName);
+            string prefabPath = Path.Combine("Assets", "Prefabs", package, $"{package}.prefab");
+            GameObject prefab = AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject)) as GameObject;
+            if (prefab != null)
+            {
+                GameObject newObj = GameObject.Instantiate(prefab);
+                if (s_currentObject != null)
+                {
+                    newObj.name = s_currentObject.name;
+                    newObj.transform.position = s_currentObject.transform.position;
+                    newObj.transform.rotation = s_currentObject.transform.rotation;
+                    newObj.transform.localScale = s_currentObject.transform.localScale;
+                    GameObject.Destroy(s_currentObject);
+                    s_currentObject = newObj;
+                }
+                AssetDatabase.importPackageCompleted -= ImportPackageCompletedHanddler;
+                Executor.RespondCompletion(true);
+            }
+            else
+            {
+                Executor.RespondCompletion(false);
+            }
+        }
+
+        public static void ImportPackage(string prefab)
+        {
+            if (!Settings.Loaded)
+            {
+                Settings.Load();
+            }
+            string packagePath = Path.Combine(Settings.RecoursePath, "Prefabs", prefab, $"{prefab}.unitypackage");
+            AssetDatabase.importPackageCompleted += ImportPackageCompletedHanddler;
+            AssetDatabase.ImportPackage(packagePath, false);
+        }
+
+        //[MenuItem("T2G/Test creating prefab object")]
+        //static void TestCreatingPrefabObject()
+        //{
+        //    ExecutionCreateObject.ImportPackage("PlayerSwat");
+        //}
     }
 
     [Execution("ADDON")]

@@ -55,11 +55,11 @@ public partial class Interpreter
                 }
                 if (!string.IsNullOrEmpty(lookAtTarget))
                 {
-                    sb.Append($" -TARGET {lookAtTarget}");
+                    sb.Append($" -TARGET \"{lookAtTarget}\"");
                 }
                 if (!string.IsNullOrEmpty(script))
                 {
-                    sb.Append($" -SCRIPT {script}");
+                    sb.Append($" -SCRIPT \"{script}\"");
                 }
             }
             else if (script.CompareTo("FirstPersonCameraController.cs") == 0)
