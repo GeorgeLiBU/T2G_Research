@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEditor.SceneManagement;
@@ -109,6 +110,68 @@ namespace T2G.UnityAdapter
     [Execution("CREATE_OBJECT")]
     public class ExecutionCreateObject : ExecutionBase
     {
+        [InitializeOnLoadMethod]
+        static async void ProcessPendingInsrtuction()
+        {
+            var prefabName = EditorPrefs.GetString(Defs.k_Pending_NewPrefabObject, null);
+            if (string.IsNullOrEmpty(prefabName))
+            {
+                return;
+            }
+            EditorPrefs.SetString(Defs.k_Pending_NewPrefabObject, string.Empty);
+
+            //Wait for re-connection from the client
+            float timer = 300.0f;  //Wait for 5 minutes 
+            while (!CommunicatorServer.Instance.IsConnected)
+            {
+                await Task.Delay(100);
+                timer -= 0.1f;
+                if (timer <= 0.0f)
+                {
+                    Debug.LogError("[AddScipt.ProcessPendingInsrtuction] Timeout waiting for client re-connection.");
+                    return;
+                }
+            }
+
+            var args = EditorPrefs.GetString(Defs.k_Pending_Arguments, null);
+            string[] argsArr = args.Split(",");
+            List<string> argList = new List<string>(argsArr);
+
+            string prefabPath = Path.Combine("Assets", "Prefabs", prefabName, $"{prefabName}.prefab");
+            GameObject prefab = AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject)) as GameObject;
+            if (prefab != null)
+            {
+                GameObject newObj = GameObject.Instantiate(prefab, Vector3.zero, Quaternion.identity);
+                newObj.name = Executor.GetPropertyValue("-OBJECT", ref argList);
+                var position = Executor.GetPropertyValue("-POSITION", ref argList);
+                var rotation = Executor.GetPropertyValue("-ROTATION", ref argList);
+                var scale = Executor.GetPropertyValue("-SCALE", ref argList);
+                if (!string.IsNullOrEmpty(position))
+                {
+                    float[] float3 = Executor.ParseFloat3(position);
+                    newObj.transform.position = new Vector3(float3[0], float3[1], float3[2]);
+                }
+                if (!string.IsNullOrEmpty(rotation))
+                {
+                    float[] float3 = Executor.ParseFloat3(rotation);
+                    Quaternion q = Quaternion.Euler(float3[0], float3[1], float3[2]);
+                    newObj.transform.rotation = q; 
+                }
+                if (!string.IsNullOrEmpty(scale))
+                {
+                    float[] float3 = Executor.ParseFloat3(scale);
+                    newObj.transform.localScale = new Vector3(float3[0], float3[1], float3[2]);
+                }
+                s_currentObject = newObj;
+                Executor.RespondCompletion(true, $"{prefabName} object was created!");
+            }
+            else
+            {
+                Executor.RespondCompletion(false, $"Missing prefab '{prefabName}' to create the object!");
+            }
+        }
+
+
         public override void HandleExecution(Executor.Instruction instruction)
         {
             var args = instruction.Arguments;
@@ -116,103 +179,72 @@ namespace T2G.UnityAdapter
             Vector3 pos = Vector3.zero, rot = Vector3.zero, scale = Vector3.one;
             string prefab = null;
             s_currentObject = null;
-            for (int i = 1; i < instruction.Arguments.Count; i += 2)
+
+            string prefabName = Executor.GetPropertyValue("-PREFAB", ref args, false, 1);
+            if (string.IsNullOrEmpty(prefabName))
             {
-                if (args[i].CompareTo("-WORLD") == 0)
+                for (int i = 1; i < instruction.Arguments.Count; i += 2)
                 {
-                    string worldName = args[i].Trim('"');
-                    if (EditorSceneManager.GetActiveScene().name.CompareTo(worldName) != 0)
+                    if (args[i].CompareTo("-WORLD") == 0)
                     {
-                        string worldPathFile = Path.Combine(Application.dataPath, worldName + ".unity");
-                        if (File.Exists(worldPathFile))
+                        string worldName = args[i].Trim('"');
+                        if (EditorSceneManager.GetActiveScene().name.CompareTo(worldName) != 0)
                         {
-                            EditorSceneManager.OpenScene(worldPathFile);
-                        }
-                        else
-                        {
-                            Executor.Instance.PostponseInstruction(instruction);
-                            continue;
+                            string worldPathFile = Path.Combine(Application.dataPath, worldName + ".unity");
+                            if (File.Exists(worldPathFile))
+                            {
+                                EditorSceneManager.OpenScene(worldPathFile);
+                            }
+                            else
+                            {
+                                Executor.Instance.PostponseInstruction(instruction);
+                                continue;
+                            }
                         }
                     }
+                    if (args[i].CompareTo("-POSITION") == 0)
+                    {
+                        float[] fValues = Executor.ParseFloat3(args[i + 1]);
+                        pos = new Vector3(fValues[0], fValues[1], fValues[2]);
+                    }
+                    if (args[i].CompareTo("-ROTATION") == 0)
+                    {
+                        float[] fValues = Executor.ParseFloat3(args[i + 1]);
+                        rot = new Vector3(fValues[0], fValues[1], fValues[2]);
+                    }
+                    if (args[i].CompareTo("-SCALE") == 0)
+                    {
+                        float[] fValues = Executor.ParseFloat3(args[i + 1]);
+                        scale = new Vector3(fValues[0], fValues[1], fValues[2]);
+                    }
                 }
-                if (args[i].CompareTo("-POSITION") == 0)
-                {
-                    float[] fValues = Executor.ParseFloat3(args[i + 1]);
-                    pos = new Vector3(fValues[0], fValues[1], fValues[2]);
-                }
-                if (args[i].CompareTo("-ROTATION") == 0)
-                {
-                    float[] fValues = Executor.ParseFloat3(args[i + 1]);
-                    rot = new Vector3(fValues[0], fValues[1], fValues[2]);
-                }
-                if (args[i].CompareTo("-SCALE") == 0)
-                {
-                    float[] fValues = Executor.ParseFloat3(args[i + 1]);
-                    scale = new Vector3(fValues[0], fValues[1], fValues[2]);
-                }
-                if(args[i].CompareTo("-PREFAB") == 0)
-                {
-                    prefab = args[i + 1].Trim('"');
-                }
-            }
 
-            s_currentObject = new GameObject(objName);
-            s_currentObject.transform.position = pos;
-            s_currentObject.transform.Rotate(rot);
-            s_currentObject.transform.localScale = scale;
+                s_currentObject = new GameObject(objName);
+                s_currentObject.transform.position = pos;
+                s_currentObject.transform.Rotate(rot);
+                s_currentObject.transform.localScale = scale;
 
-            if (string.IsNullOrEmpty(prefab))
-            {
                 Executor.RespondCompletion(true);
             }
             else
             {
-                ImportPackage(prefab);
-            }
-        }
-
-        static void ImportPackageCompletedHanddler(string packageName)
-        {
-            string package = Path.GetFileName(packageName);
-            string prefabPath = Path.Combine("Assets", "Prefabs", package, $"{package}.prefab");
-            GameObject prefab = AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject)) as GameObject;
-            if (prefab != null)
-            {
-                GameObject newObj = GameObject.Instantiate(prefab);
-                if (s_currentObject != null)
+                List<string> argList = new List<string>(instruction.Arguments);
+                argList.Insert(0, "-OBJECT");
+                string argsString = argList[0];
+                for(int i = 1; i < argList.Count; ++i)
                 {
-                    newObj.name = s_currentObject.name;
-                    newObj.transform.position = s_currentObject.transform.position;
-                    newObj.transform.rotation = s_currentObject.transform.rotation;
-                    newObj.transform.localScale = s_currentObject.transform.localScale;
-                    GameObject.Destroy(s_currentObject);
-                    s_currentObject = newObj;
+                    argsString += $",argList[i]";
                 }
-                AssetDatabase.importPackageCompleted -= ImportPackageCompletedHanddler;
-                Executor.RespondCompletion(true);
-            }
-            else
-            {
-                Executor.RespondCompletion(false);
+                EditorPrefs.SetString(Defs.k_Pending_NewPrefabObject, prefabName);
+                EditorPrefs.SetString(Defs.k_Pending_Arguments, argsString);
+                ContentLibrary.ImportPackage(prefab, ImportPackageCompletedHanddler);
             }
         }
 
-        public static void ImportPackage(string prefab)
+        public static void ImportPackageCompletedHanddler(string packageName)
         {
-            if (!Settings.Loaded)
-            {
-                Settings.Load();
-            }
-            string packagePath = Path.Combine(Settings.RecoursePath, "Prefabs", prefab, $"{prefab}.unitypackage");
-            AssetDatabase.importPackageCompleted += ImportPackageCompletedHanddler;
-            AssetDatabase.ImportPackage(packagePath, false);
+            ProcessPendingInsrtuction();
         }
-
-        //[MenuItem("T2G/Test creating prefab object")]
-        //static void TestCreatingPrefabObject()
-        //{
-        //    ExecutionCreateObject.ImportPackage("PlayerSwat");
-        //}
     }
 
     [Execution("ADDON")]
@@ -236,54 +268,28 @@ namespace T2G.UnityAdapter
         public override void HandleExecution(Executor.Instruction instruction)
         {
             var argList = new List<string>(instruction.Arguments);
-            string addonType = GetAddonType(ref argList);
-            string worldName = GetWorldName(ref argList);
-            string objectName = GetObjectName(ref argList);
-            if (!string.IsNullOrEmpty(worldName) && 
-                EditorSceneManager.GetActiveScene().name.CompareTo(worldName) != 0)
-            {
-                EditorSceneManager.OpenScene($"Assets/Scenes/{worldName}.unity");
-            }
-            if (string.IsNullOrEmpty(objectName))
+            string worldName = Executor.GetPropertyValue("-WORLD", ref argList, false); 
+            if(!Executor.OpenWorld(worldName))
             {
                 Executor.RespondCompletion(false);
                 return;
             }
-            else
+            string targetName = Executor.GetPropertyValue("-TARGET", ref argList, false);
+            if (!string.IsNullOrEmpty(targetName) && GameObject.Find(targetName) == null)
             {
-                if (s_currentObject == null || s_currentObject.name.CompareTo(objectName) != 0)
-                {
-                    s_currentObject = GameObject.Find(objectName);
-                    if (s_currentObject == null)
-                    {
-                        Executor.Instance.PostponseInstruction(instruction);
-                        Executor.RespondCompletion(true, 1);
-                        return;
-                    }
-                }
+                Executor.Instance.PostponseInstruction(instruction);
+                Executor.RespondCompletion(true, "Postponed the task!");
+                return;
             }
-
-            if(s_addonProcessor.ContainsKey(addonType))
+            string addonType = Executor.GetPropertyValue("-TYPE", ref argList, false);
+            if (s_addonProcessor.ContainsKey(addonType))
             {
                 s_addonProcessor[addonType].AddAddon(s_currentObject, argList);
             }
-
-            Executor.RespondCompletion(true);
-        }
-
-        string GetWorldName(ref List<string> argList)
-        {
-            return Executor.GetPropertyValue("-WORLD", ref argList);
-        }
-
-        string GetObjectName(ref List<string> argList)
-        {
-            return Executor.GetPropertyValue("-OBJECT", ref argList);
-        }
-
-        string GetAddonType(ref List<string> argList)
-        {
-            return Executor.GetPropertyValue("-TYPE", ref argList);
+            else
+            {
+                Executor.RespondCompletion(false);
+            }
         }
     }
 }

@@ -49,10 +49,23 @@ namespace T2G.UnityAdapter
             return retVal;
         }
 
-        public static bool ImportPrefab(string prefabName)
+        public static bool ImportPackage(string prefabName, AssetDatabase.ImportPackageCallback CompletedHanddler)
         {
+            if (!Settings.Loaded)
+            {
+                Settings.Load();
+            }
+            string packagePath = Path.Combine(Settings.RecoursePath, "Prefabs", prefabName, $"{prefabName}.unitypackage");
+            AssetDatabase.importPackageCompleted += CompletedHanddler;
+            AssetDatabase.ImportPackage(packagePath, false);
             return true;
         }
+
+        //[MenuItem("T2G/Test creating prefab object")]
+        //static void TestCreatingPrefabObject()
+        //{
+        //    ExecutionCreateObject.ImportPackage("PlayerSwat");
+        //}
 
     }
 }

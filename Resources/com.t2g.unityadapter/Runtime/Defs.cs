@@ -1,5 +1,6 @@
 public class Defs
 {
+    //Game project
     public static readonly string k_UnityEditorPath = "UnityEditorPath";
     public static readonly string k_UserName = "UserName";
     public static readonly string k_AssistantName = "AssistantName";
@@ -10,6 +11,11 @@ public class Defs
     public static readonly string k_InitOpenScene = "OpenScene";
     public static readonly string k_DashboardIsOpen = "DashboardIsOpen";
     public static readonly string k_StartListener = "StartListener";
+
+    //ExecutorPrefs keys
+    public static readonly string k_Pending_AddonScript = "PendingAddonScript";
+    public static readonly string k_Pending_NewPrefabObject = "NewPrefabObject";
+    public static readonly string k_Pending_Arguments = "PendingArguments";
 
     //GameDesc key names
     public static readonly string k_GameDesc_CategoryKeyName = "Category";
@@ -27,4 +33,5 @@ public class Defs
     public static readonly string k_GameWorldCategory = "GameWorld";
     public static readonly string k_WorldObjectCategory = "WorldObject";
     public static readonly string k_ObjectAddonCategory = "Addon";
+
 }

@@ -5,6 +5,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Compilation;
+using System.Threading.Tasks;
 
 namespace T2G.UnityAdapter
 {
@@ -143,7 +144,7 @@ namespace T2G.UnityAdapter
         {
             //This function may be called multiple times.
             //Check didDomainReload to ensure it is fully completed
-            if (didDomainReload)  
+            if (didDomainReload)
             {
                 CompletedCallback?.Invoke();
             }
@@ -153,6 +154,67 @@ namespace T2G.UnityAdapter
     [AddAddon("Script")]
     public class AddScript : AddAddonBase
     {
+        [InitializeOnLoadMethod]
+        static async void ProcessPendingInsrtuction()
+        {
+            var scriptName = EditorPrefs.GetString(Defs.k_Pending_AddonScript, null);
+            if(string.IsNullOrEmpty(scriptName))
+            {
+                return;
+            }
+            EditorPrefs.SetString(Defs.k_Pending_AddonScript, string.Empty);
+
+            //Wait for re-connection from the client
+            float timer = 300.0f;  //Wait for 5 minutes 
+            while (!CommunicatorServer.Instance.IsConnected)
+            {
+                await Task.Delay(100);
+                timer -= 0.1f;
+                if(timer <= 0.0f)
+                {
+                    Debug.LogError("[AddScipt.ProcessPendingInsrtuction] Timeout waiting for client re-connection.");
+                    return; 
+                }
+            }
+
+            var args = EditorPrefs.GetString(Defs.k_Pending_Arguments, null);
+            string[] argsArr = args.Split(",");
+            List<string> argList = new List<string>(argsArr);
+            
+            //Process: Add script addon to gameobject
+            var worldName = Executor.GetPropertyValue("-WORLD", ref argList);
+            if (!Executor.OpenWorld(worldName))
+            {
+                Executor.RespondCompletion(false, $"World {worldName} doesn't exist!");
+                return;
+            }
+            var objectName = Executor.GetPropertyValue("-OBJECT", ref argList);
+            if (string.IsNullOrEmpty(objectName))
+            {
+                Executor.RespondCompletion(false, $"Invalid object name!");
+                return;
+            }
+            GameObject gameObject = GameObject.Find(objectName);
+            if (gameObject == null)
+            {
+                Executor.RespondCompletion(false, $"Missiong {objectName} object!");
+                return;
+            }
+            ExecutionBase.SetCurrentObject(gameObject);
+            var scriptClassName = Executor.GetScriptClassName(scriptName);
+            var type = Type.GetType(scriptClassName);
+            var component = gameObject.AddComponent(type);
+            var properties = type.GetProperties();
+            foreach (var property in properties)
+            {
+                var propertyValue = Executor.GetPropertyValue(property.Name, ref argList);
+                if(!String.IsNullOrEmpty(propertyValue))
+                {
+                    Executor.SetPropertyValue(component, property, propertyValue);
+                }
+            }
+        }
+
         public override void AddAddon(GameObject gameObject, List<string> argList)
         {
             if (gameObject == null)
@@ -163,70 +225,41 @@ namespace T2G.UnityAdapter
             {
                 var scriptName = Executor.GetPropertyValue("-SCRIPT", ref argList);
                 var dependencies = Executor.GetPropertyValue("-DEPENDENCIES", ref argList);
-                AddonAssetPostprocessor.CompletedCallback = () =>
+                bool allReady = Executor.FileExistsInProject(scriptName + ".cs");
+                if(allReady)
+                {
+                    var dependencyFiles = dependencies.Split(",");
+                    allReady = Executor.FilesExistInProject(dependencyFiles);
+                }
+
+                if (allReady)     //All the script files are already inside the project
                 {
                     var scriptClassName = Executor.GetScriptClassName(scriptName);
-                    Debug.LogWarning($"5. scriptClassName: {scriptClassName}");
                     var type = Type.GetType(scriptClassName);
                     var component = gameObject.AddComponent(type);
                     var properties = type.GetProperties();
                     foreach (var property in properties)
                     {
                         var propertyValue = Executor.GetPropertyValue(property.Name, ref argList);
-                        Debug.LogWarning($"6. property: {property.Name}; property type: {property.PropertyType.ToString()}");
-                        if (!string.IsNullOrEmpty(propertyValue))
+                        if (!String.IsNullOrEmpty(propertyValue))
                         {
-                            if (property.PropertyType == typeof(string))
-                            {
-                                property.SetValue(gameObject, propertyValue);
-                            }
-                            else if (property.PropertyType == typeof(float))
-                            {
-                                property.SetValue(gameObject, float.Parse(propertyValue));
-                            }
-                            else if (property.PropertyType == typeof(int))
-                            {
-                                property.SetValue(gameObject, int.Parse(propertyValue));
-                            }
-                            else if (property.PropertyType == typeof(bool))
-                            {
-                                property.SetValue(gameObject, bool.Parse(propertyValue));
-                            }
-                            else if (property.PropertyType == typeof(Vector3))
-                            {
-                                    //property.SetValue(gameObject, int.Parse(propertyValue));
-                                }
-                            else if (property.PropertyType == typeof(Vector2))
-                            {
-                                    //property.SetValue(gameObject, int.Parse(propertyValue));
-                                }
-                            else if (property.PropertyType == typeof(Vector4))
-                            {
-                                    //property.SetValue(gameObject, int.Parse(propertyValue));
-                                }
-                            else if (property.PropertyType == typeof(Color))
-                            {
-                                    //property.SetValue(gameObject, int.Parse(propertyValue));
-                                }
+                            Executor.SetPropertyValue(component, property, propertyValue);
                         }
                     }
-                    AddonAssetPostprocessor.CompletedCallback = null;
-
-                    Action<object> compilationCallback = null;
-                    compilationCallback = (obj) =>
-                    {
-                        CompilationPipeline.compilationFinished -= compilationCallback;
-                        Executor.RespondCompletion(true);
-                    };
-
-                    CompilationPipeline.compilationFinished += compilationCallback;
-                    //mpilationPipeline.RequestScriptCompilation(RequestScriptCompilationOptions.CleanBuildCache);
-                    CompilationPipeline.RequestScriptCompilation(RequestScriptCompilationOptions.None);
-                };
-
-                if (!ContentLibrary.ImportScript(scriptName, dependencies))
+                }
+                else
                 {
-                    Executor.RespondCompletion(false);
+                    string args = argList.Count == 0 ? string.Empty : argList[0];
+                    for (int i = 1; i < argList.Count; ++i)
+                    {
+                        args += "," + argList[i];
+                    }
+                    EditorPrefs.SetString(Defs.k_Pending_AddonScript, scriptName);
+                    EditorPrefs.SetString(Defs.k_Pending_Arguments, args);
+                    if (!ContentLibrary.ImportScript(scriptName, dependencies))
+                    {
+                        Executor.RespondCompletion(false);
+                    }
                 }
             }
         }
