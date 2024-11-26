@@ -199,33 +199,37 @@ namespace T2G.UnityAdapter
                 }
                 ExecutionBase.SetCurrentObject(gameObject);
                 var scriptClassName = Executor.GetScriptClassName(scriptName);
-                Debug.LogError($"scriptClassName={scriptClassName}");
 
-                Type type = Type.GetType(scriptClassName); //won't work because of assmbly
-                if (type == null)
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                Type type = null;
+                foreach (var assembly in assemblies)
                 {
-                    Debug.LogError($"type=null");
+                    type = assembly.GetType(scriptClassName);
+                    if (type != null)
+                    {
+                        break;
+                    }
+                }
+                if (type != null)
+                {
+                    var script = gameObject.AddComponent(type);
+                    string settingsString = Executor.GetPropertyValue("-SETTINGS", ref argList);
+                    var settingsList = Executor.GetSettingsList(settingsString);
+                    for (int i = 0; i < settingsList.Count - 1; i += 2)
+                    {
+                        var fieldInfo = type.GetField(settingsList[i]);
+                        if (fieldInfo != null)
+                        {
+                            Executor.SetFieldValue(script, fieldInfo, settingsList[i + 1]);
+                        }
+                    }
+                    Executor.RespondCompletion(true);
                 }
                 else
                 {
-                    Debug.LogError($"type={type.Name}");
-                }
-                var component = gameObject.AddComponent(type);
-
-                string settingsString = Executor.GetPropertyValue("-SETTINGS", ref argList);
-                var settingsList = Executor.GetSettingsList(settingsString);
-                for (int i = 0; i < settingsList.Count - 1; i += 2)
-                {
-                    Debug.LogError($"key={settingsList[i]}; value={settingsList[i + 1]}");
-                    var fieldInfo = type.GetField(settingsList[i]);
-                    if (fieldInfo != null)
-                    {
-                        Debug.LogWarning($"Set field {fieldInfo.Name} with {settingsList[i + 1]}. Type={fieldInfo.FieldType.Name}");
-                    }
+                    Executor.RespondCompletion(false, $"Failed adding component {scriptClassName}!");
                 }
             }
-
-            Executor.RespondCompletion(true);
         }
 
         public override void AddAddon(GameObject gameObject, List<string> argList)
@@ -249,14 +253,14 @@ namespace T2G.UnityAdapter
                 {
                     var scriptClassName = Executor.GetScriptClassName(scriptName);
                     var type = Type.GetType(scriptClassName);
-                    var component = gameObject.AddComponent(type);
-                    var properties = type.GetProperties();
-                    foreach (var property in properties)
+                    var script = gameObject.AddComponent(type);
+                    var fields = type.GetFields();
+                    foreach (var fieldInfo in fields)
                     {
-                        var propertyValue = Executor.GetPropertyValue(property.Name, ref argList);
-                        if (!String.IsNullOrEmpty(propertyValue))
+                        var value = Executor.GetPropertyValue(fieldInfo.Name, ref argList);
+                        if (!String.IsNullOrEmpty(value))
                         {
-                            Executor.SetPropertyValue(component, property, propertyValue);
+                            Executor.SetFieldValue(script, fieldInfo, value);
                         }
                     }
                 }

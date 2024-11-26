@@ -147,48 +147,48 @@ namespace T2G.UnityAdapter
             return retVal;
         }
 
-        public static void SetPropertyValue(object component, System.Reflection.PropertyInfo property, string value)
+        public static void SetFieldValue(object component, System.Reflection.FieldInfo fieldInfo, string value)
         {
             value = value.Trim('"');
-            if(property.PropertyType == typeof(string))
+            if(fieldInfo.FieldType == typeof(string))
             {
-                property.SetValue(component, value);
+                fieldInfo.SetValue(component, value);
             }
-            else if (property.PropertyType == typeof(float))
+            else if (fieldInfo.FieldType == typeof(float))
             {
-                property.SetValue(component, float.Parse(value));
+                fieldInfo.SetValue(component, float.Parse(value));
             }
-            else if (property.PropertyType == typeof(int))
+            else if (fieldInfo.FieldType == typeof(int))
             {
-                property.SetValue(component, int.Parse(value));
+                fieldInfo.SetValue(component, int.Parse(value));
             }
-            else if (property.PropertyType == typeof(bool))
+            else if (fieldInfo.FieldType == typeof(bool))
             {
-                property.SetValue(component, bool.Parse(value));
+                fieldInfo.SetValue(component, bool.Parse(value));
             }
-            else if (property.PropertyType == typeof(Vector2))
+            else if (fieldInfo.FieldType == typeof(Vector2))
             {
                 var float2 = Executor.ParseFloat2(value);
                 Vector2 vector2 = new Vector2(float2[0], float2[1]);
-                property.SetValue(component, vector2);
+                fieldInfo.SetValue(component, vector2);
             }
-            else if (property.PropertyType == typeof(Vector3))
+            else if (fieldInfo.FieldType == typeof(Vector3))
             {
                 var float3 = Executor.ParseFloat3(value);
                 Vector3 vector3 = new Vector3(float3[0], float3[1], float3[2]);
-                property.SetValue(component, vector3);
+                fieldInfo.SetValue(component, vector3);
             }
-            else if (property.PropertyType == typeof(Vector4))
+            else if (fieldInfo.FieldType == typeof(Vector4))
             {
                 var float4 = Executor.ParseFloat4(value);
                 Vector3 vector4 = new Vector4(float4[0], float4[1], float4[2], float4[3]);
-                property.SetValue(component, vector4);
+                fieldInfo.SetValue(component, vector4);
             }
-            else if (property.PropertyType == typeof(Color))
+            else if (fieldInfo.FieldType == typeof(Color))
             {
                 var float4 = Executor.ParseFloat4(value);
                 Color color = new Color(float4[0], float4[1], float4[2], float4[3]);
-                property.SetValue(component, color);
+                fieldInfo.SetValue(component, color);
             }
         }
 

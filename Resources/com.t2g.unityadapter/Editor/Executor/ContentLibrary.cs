@@ -61,12 +61,5 @@ namespace T2G.UnityAdapter
             AssetDatabase.Refresh();
             return true;
         }
-
-        //[MenuItem("T2G/Test creating prefab object")]
-        //static void TestCreatingPrefabObject()
-        //{
-        //    ExecutionCreateObject.ImportPackage("PlayerSwat");
-        //}
-
     }
 }
