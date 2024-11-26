@@ -58,6 +58,7 @@ namespace T2G.UnityAdapter
             string packagePath = Path.Combine(Settings.RecoursePath, "Prefabs", prefabName, $"{prefabName}.unitypackage");
             AssetDatabase.importPackageCompleted += CompletedHanddler;
             AssetDatabase.ImportPackage(packagePath, false);
+            AssetDatabase.Refresh();
             return true;
         }
 

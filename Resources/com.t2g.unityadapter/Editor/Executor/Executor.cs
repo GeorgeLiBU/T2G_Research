@@ -99,6 +99,16 @@ namespace T2G.UnityAdapter
 
         private void Execute(Instruction instruction)
         {
+            if(string.Compare(instruction.Command, Defs.k_EndOfGameGeneration) == 0)
+            {
+                //Start processing postponed instructions
+                foreach(var ins in _instructionBuffer)
+                {
+                    Execute(ins);
+                }
+                RespondCompletion(true, "Game generation is completed!");
+            }
+
             if(_executionPool.ContainsKey(instruction.Command))
             {
                 _executionPool[instruction.Command].HandleExecution(instruction);

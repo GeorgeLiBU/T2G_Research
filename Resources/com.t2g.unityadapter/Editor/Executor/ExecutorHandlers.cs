@@ -15,7 +15,7 @@ namespace T2G.UnityAdapter
     {
         HashSet<Instruction> _instructionBuffer = new HashSet<Instruction>();
 
-        public void PostponseInstruction(Instruction instruction)
+        public void PostponeInstruction(Instruction instruction)
         {
             if (!_instructionBuffer.Contains(instruction))
             {
@@ -138,7 +138,7 @@ namespace T2G.UnityAdapter
             List<string> argList = new List<string>(argsArr);
 
             string prefabPath = Path.Combine("Assets", "Prefabs", prefabName, $"{prefabName}.prefab");
-            GameObject prefab = AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject)) as GameObject;
+            GameObject prefab = AssetDatabase.LoadAssetAtPath(prefabPath, typeof(UnityEngine.Object)) as GameObject;
             if (prefab != null)
             {
                 GameObject newObj = GameObject.Instantiate(prefab, Vector3.zero, Quaternion.identity);
@@ -177,7 +177,6 @@ namespace T2G.UnityAdapter
             var args = instruction.Arguments;
             string objName = args[0].Trim('"');
             Vector3 pos = Vector3.zero, rot = Vector3.zero, scale = Vector3.one;
-            string prefab = null;
             s_currentObject = null;
 
             string prefabName = Executor.GetPropertyValue("-PREFAB", ref args, false, 1);
@@ -187,7 +186,7 @@ namespace T2G.UnityAdapter
                 {
                     if (args[i].CompareTo("-WORLD") == 0)
                     {
-                        string worldName = args[i].Trim('"');
+                        string worldName = args[i + 1].Trim('"');
                         if (EditorSceneManager.GetActiveScene().name.CompareTo(worldName) != 0)
                         {
                             string worldPathFile = Path.Combine(Application.dataPath, worldName + ".unity");
@@ -197,8 +196,8 @@ namespace T2G.UnityAdapter
                             }
                             else
                             {
-                                Executor.Instance.PostponseInstruction(instruction);
-                                continue;
+                                Executor.RespondCompletion(false, $"World {worldName} doesn't exist!");
+                                return;
                             }
                         }
                     }
@@ -233,11 +232,11 @@ namespace T2G.UnityAdapter
                 string argsString = argList[0];
                 for(int i = 1; i < argList.Count; ++i)
                 {
-                    argsString += $",argList[i]";
+                    argsString += $",{argList[i]}";
                 }
                 EditorPrefs.SetString(Defs.k_Pending_NewPrefabObject, prefabName);
                 EditorPrefs.SetString(Defs.k_Pending_Arguments, argsString);
-                ContentLibrary.ImportPackage(prefab, ImportPackageCompletedHanddler);
+                ContentLibrary.ImportPackage(prefabName, ImportPackageCompletedHanddler);
             }
         }
 
@@ -272,13 +271,6 @@ namespace T2G.UnityAdapter
             if(!Executor.OpenWorld(worldName))
             {
                 Executor.RespondCompletion(false);
-                return;
-            }
-            string targetName = Executor.GetPropertyValue("-TARGET", ref argList, false);
-            if (!string.IsNullOrEmpty(targetName) && GameObject.Find(targetName) == null)
-            {
-                Executor.Instance.PostponseInstruction(instruction);
-                Executor.RespondCompletion(true, "Postponed the task!");
                 return;
             }
             string addonType = Executor.GetPropertyValue("-TYPE", ref argList, false);

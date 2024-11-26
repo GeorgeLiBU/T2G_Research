@@ -77,7 +77,7 @@ namespace T2G.UnityAdapter
 
         public static string GetPropertyValue(string propertyName, ref List<string> argList, bool removeProperty = true, int startIndex = 0)
         {
-            string value = null;
+            string value = string.Empty;
             if(!string.IsNullOrEmpty(propertyName) && argList != null && argList.Count > 0)
             {
                 for(int i = startIndex; i < argList.Count - 1; i += 2)
@@ -190,6 +190,21 @@ namespace T2G.UnityAdapter
                 Color color = new Color(float4[0], float4[1], float4[2], float4[3]);
                 property.SetValue(component, color);
             }
+        }
+
+        public static List<string> GetSettingsList(string settingsString)
+        {
+            List<string> settingsList = new List<string>();
+            string[] settingsArr = settingsString.Split(';');
+            for (int i = 0; i < settingsArr.Length; ++i)
+            {
+                int idx = settingsArr[i].IndexOf("=");
+                string key = settingsArr[i].Substring(0, idx);
+                string value = settingsArr[i].Substring(idx + 1);
+                settingsList.Add(key);
+                settingsList.Add(value);
+            }
+            return settingsList;
         }
     }
 }

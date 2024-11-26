@@ -44,22 +44,37 @@ public partial class Interpreter
                 sb.Append($" -DEPENDENCIES \"{dependencies}\"");
             }
 
-            if (script.CompareTo("ThirdPersonCameraController.cs") == 0)
+            if (script.CompareTo("ThirdPersonCameraController.cs") == 0 ||
+                script.CompareTo("TopDownCameraController.cs") == 0)
             {
-                var offset = jsonObj.GetValueOrDefault("Offset", string.Empty).ToString().Trim('"');
-                var lookAtTarget = jsonObj.GetValueOrDefault("Target", string.Empty).ToString().Trim('"');
+                var offset = jsonObj.GetValueOrDefault("ViewOffset", string.Empty).ToString().Trim('"');
+                var target = jsonObj.GetValueOrDefault("TargetName", string.Empty).ToString().Trim('"');
 
-                if (!string.IsNullOrEmpty(offset))
-                {
-                    sb.Append($" -OFFSET {offset}");
-                }
-                if (!string.IsNullOrEmpty(lookAtTarget))
-                {
-                    sb.Append($" -TARGET \"{lookAtTarget}\"");
-                }
                 if (!string.IsNullOrEmpty(script))
                 {
                     sb.Append($" -SCRIPT \"{script}\"");
+                }
+
+                string settings = string.Empty;
+                if (!string.IsNullOrEmpty(offset))
+                {
+                    settings = $"ViewOffset={offset}";
+                }
+                if (!string.IsNullOrEmpty(target))
+                {
+                    if (string.IsNullOrEmpty(settings))
+                    {
+                        settings = $"TargetName={target}";
+                    }
+                    else
+                    {
+                        settings += $";TargetName={target}";
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(settings))
+                {
+                    sb.Append($" -SETTINGS \"{settings}\"");
                 }
             }
             else if (script.CompareTo("FirstPersonCameraController.cs") == 0)
@@ -68,23 +83,6 @@ public partial class Interpreter
                 if (!string.IsNullOrEmpty(viewOffset))
                 {
                     sb.Append($" -VIEW_OFFSET {viewOffset}");
-                }
-                if (!string.IsNullOrEmpty(script))
-                {
-                    sb.Append($" -SCRIPT {script}");
-                }
-            }
-            else if (script.CompareTo("FirstAndThirdPersonCameraController.cs") == 0)
-            {
-                var viewOffset = jsonObj.GetValueOrDefault("ViewOffset", "[0, 0, 0]").ToString().Trim('"');
-                var offset = jsonObj.GetValueOrDefault("Offset", "[0, 0, 0]").ToString().Trim('"');
-                if (!string.IsNullOrEmpty(viewOffset))
-                {
-                    sb.Append($" -VIEW_OFFSET {viewOffset}");
-                }
-                if (!string.IsNullOrEmpty(offset))
-                {
-                    sb.Append($" -OFFSET {offset}");
                 }
                 if (!string.IsNullOrEmpty(script))
                 {

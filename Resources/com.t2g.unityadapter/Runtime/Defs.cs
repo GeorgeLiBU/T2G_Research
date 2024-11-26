@@ -12,7 +12,7 @@ public class Defs
     public static readonly string k_DashboardIsOpen = "DashboardIsOpen";
     public static readonly string k_StartListener = "StartListener";
 
-    //ExecutorPrefs keys
+    //Execution EditorPrefs keys
     public static readonly string k_Pending_AddonScript = "PendingAddonScript";
     public static readonly string k_Pending_NewPrefabObject = "NewPrefabObject";
     public static readonly string k_Pending_Arguments = "PendingArguments";
@@ -34,4 +34,6 @@ public class Defs
     public static readonly string k_WorldObjectCategory = "WorldObject";
     public static readonly string k_ObjectAddonCategory = "Addon";
 
+    //Instruction commands
+    public static readonly string k_EndOfGameGeneration = "End of game generation.";
 }

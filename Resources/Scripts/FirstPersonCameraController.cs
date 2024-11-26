@@ -12,7 +12,6 @@ public class FirstPersonCameraController : PlayerCameraController
         ViewOffset = new Vector3(0.0f, 1.7f, 0.0f);
     }
 
-
     void LateUpdate()
     {
         if (_PlayerTarget != null)

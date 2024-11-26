@@ -65,7 +65,7 @@ public class SampleGameDescLibrary
         camera.FieldOfView = 50.0f;
         gameDesc.GameWorlds[0].Objects[0].Addons[0] = camera;
         ThirdPersonCameraController cameraController = new ThirdPersonCameraController();
-        cameraController.Target = "PlayerCharacter";
+        cameraController.TargetName = "Player";
         gameDesc.GameWorlds[0].Objects[0].Addons[1] = cameraController;
         //light
         gameDesc.GameWorlds[0].Objects[1] = new WorldObject();
@@ -187,8 +187,8 @@ public class ScriptAddon : Addon
 
 public class ThirdPersonCameraController : ScriptAddon
 {
-    public float[] Offset = new float[3] { 0.0f, 3.0f, 5.0f }; 
-    public string Target = string.Empty;
+    public float[] ViewOffset = new float[3] { 0.0f, 3.0f, 5.0f }; 
+    public string TargetName = string.Empty;
 
     public ThirdPersonCameraController() : base()
     {
@@ -208,15 +208,14 @@ public class FirstPersonCameraController : ScriptAddon
     }
 }
 
-public class MixedFirstAndThirdPersonCameraController : ScriptAddon
+public class TopDownCameraController : ScriptAddon
 {
-    public float[] Offset = new float[3] { 0.0f, 3.0f, 5.0f };
     public float[] ViewOffset = new float[3] { 0.0f, 1.8f, 0.0f };
-    public string LookAtTarget;
+    public string TargetName;
 
-    public MixedFirstAndThirdPersonCameraController() : base()
+    public TopDownCameraController() : base()
     {
-        Script = "MixedFirstAndThirdPersonCameraController.cs";
+        Script = "TopDownCameraController.cs";
         Dependencies = "PlayerCameraController.cs,ObjectController.cs";
     }
 }

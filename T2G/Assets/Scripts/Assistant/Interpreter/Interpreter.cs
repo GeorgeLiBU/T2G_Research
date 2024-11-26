@@ -20,7 +20,7 @@ public partial class Interpreter
             JSONNode gameDescObj = JSON.Parse(gameDescJson);
             Interpret(gameDescObj);
         }
-
+        _instructions.Add(Defs.k_EndOfGameGeneration);
         return _instructions.ToArray();
     }
 

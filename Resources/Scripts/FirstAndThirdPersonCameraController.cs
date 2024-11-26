@@ -11,8 +11,8 @@ public class FirstAndThirdPersonCameraController : PlayerCameraController
         ThirdPersonView
     }
 
-    public Vector3 ThirdPersonViewOffset { get; set; }  = new Vector3(0.0f, 3.0f, -5.0f);
-    public float TransitionTime { get; set; } = 0.3f;
+    public Vector3 ThirdPersonViewOffset = new Vector3(0.0f, 3.0f, -5.0f);
+    public float TransitionTime = 0.3f;
 
     private ECameraViewMode _cameraViewMode = ECameraViewMode.ThirdPersonView;
     public ECameraViewMode ViewMode => _cameraViewMode;

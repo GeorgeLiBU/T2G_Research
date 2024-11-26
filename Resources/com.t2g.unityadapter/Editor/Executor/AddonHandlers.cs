@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.Compilation;
 using System.Threading.Tasks;
 
 namespace T2G.UnityAdapter
@@ -177,42 +174,58 @@ namespace T2G.UnityAdapter
                 }
             }
 
-            var args = EditorPrefs.GetString(Defs.k_Pending_Arguments, null);
-            string[] argsArr = args.Split(",");
-            List<string> argList = new List<string>(argsArr);
-            
-            //Process: Add script addon to gameobject
-            var worldName = Executor.GetPropertyValue("-WORLD", ref argList);
-            if (!Executor.OpenWorld(worldName))
+            var args = EditorPrefs.GetString(Defs.k_Pending_Arguments, string.Empty);
+            if (!string.IsNullOrEmpty(args) && args.Length > 0)
             {
-                Executor.RespondCompletion(false, $"World {worldName} doesn't exist!");
-                return;
-            }
-            var objectName = Executor.GetPropertyValue("-OBJECT", ref argList);
-            if (string.IsNullOrEmpty(objectName))
-            {
-                Executor.RespondCompletion(false, $"Invalid object name!");
-                return;
-            }
-            GameObject gameObject = GameObject.Find(objectName);
-            if (gameObject == null)
-            {
-                Executor.RespondCompletion(false, $"Missiong {objectName} object!");
-                return;
-            }
-            ExecutionBase.SetCurrentObject(gameObject);
-            var scriptClassName = Executor.GetScriptClassName(scriptName);
-            var type = Type.GetType(scriptClassName);
-            var component = gameObject.AddComponent(type);
-            var properties = type.GetProperties();
-            foreach (var property in properties)
-            {
-                var propertyValue = Executor.GetPropertyValue(property.Name, ref argList);
-                if(!String.IsNullOrEmpty(propertyValue))
+                string[] argsArr = args.Split(", ");
+                List<string> argList = new List<string>(argsArr);
+                var worldName = Executor.GetPropertyValue("-WORLD", ref argList);
+                if (!Executor.OpenWorld(worldName))
                 {
-                    Executor.SetPropertyValue(component, property, propertyValue);
+                    Executor.RespondCompletion(false, $"World {worldName} doesn't exist!");
+                    return;
+                }
+                var objectName = Executor.GetPropertyValue("-OBJECT", ref argList);
+                if (string.IsNullOrEmpty(objectName))
+                {
+                    Executor.RespondCompletion(false, $"Invalid object name!");
+                    return;
+                }
+                GameObject gameObject = GameObject.Find(objectName);
+                if (gameObject == null)
+                {
+                    Executor.RespondCompletion(false, $"Missiong {objectName} object!");
+                    return;
+                }
+                ExecutionBase.SetCurrentObject(gameObject);
+                var scriptClassName = Executor.GetScriptClassName(scriptName);
+                Debug.LogError($"scriptClassName={scriptClassName}");
+
+                Type type = Type.GetType(scriptClassName); //won't work because of assmbly
+                if (type == null)
+                {
+                    Debug.LogError($"type=null");
+                }
+                else
+                {
+                    Debug.LogError($"type={type.Name}");
+                }
+                var component = gameObject.AddComponent(type);
+
+                string settingsString = Executor.GetPropertyValue("-SETTINGS", ref argList);
+                var settingsList = Executor.GetSettingsList(settingsString);
+                for (int i = 0; i < settingsList.Count - 1; i += 2)
+                {
+                    Debug.LogError($"key={settingsList[i]}; value={settingsList[i + 1]}");
+                    var fieldInfo = type.GetField(settingsList[i]);
+                    if (fieldInfo != null)
+                    {
+                        Debug.LogWarning($"Set field {fieldInfo.Name} with {settingsList[i + 1]}. Type={fieldInfo.FieldType.Name}");
+                    }
                 }
             }
+
+            Executor.RespondCompletion(true);
         }
 
         public override void AddAddon(GameObject gameObject, List<string> argList)
@@ -249,16 +262,20 @@ namespace T2G.UnityAdapter
                 }
                 else
                 {
-                    string args = argList.Count == 0 ? string.Empty : argList[0];
-                    for (int i = 1; i < argList.Count; ++i)
-                    {
-                        args += "," + argList[i];
-                    }
                     EditorPrefs.SetString(Defs.k_Pending_AddonScript, scriptName);
-                    EditorPrefs.SetString(Defs.k_Pending_Arguments, args);
-                    if (!ContentLibrary.ImportScript(scriptName, dependencies))
+                    EditorPrefs.SetString(Defs.k_Pending_Arguments, string.Empty);
+                    if (argList.Count > 0)
                     {
-                        Executor.RespondCompletion(false);
+                        string args = argList[0];
+                        for (int i = 1; i < argList.Count; ++i)
+                        {
+                            args += ", " + argList[i];
+                        }
+                        EditorPrefs.SetString(Defs.k_Pending_Arguments, args);
+                        if (!ContentLibrary.ImportScript(scriptName, dependencies))
+                        {
+                            Executor.RespondCompletion(false);
+                        }
                     }
                 }
             }

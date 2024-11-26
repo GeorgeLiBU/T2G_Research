@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class PlayerCameraController : ObjectController
 {
-    public string TargetName { get; set; } = string.Empty;
-    public Vector3 ViewOffset { get; set; } = new Vector3(0.0f, 1.7f, 0.0f);
+    public string TargetName = string.Empty;
+    public Vector3 ViewOffset = new Vector3(0.0f, 1.7f, 0.0f);
 
     protected GameObject _PlayerTarget;
 

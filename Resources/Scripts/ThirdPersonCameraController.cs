@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ThirdPersonCameraController : PlayerCameraController
 {
-    [SerializeField] private float _TransitionTime = 0.3f;
+    [SerializeField] private float TransitionTime = 0.3f;
 
     private Vector3 _transitVel = Vector3.zero;
 
@@ -30,7 +30,7 @@ public class ThirdPersonCameraController : PlayerCameraController
                 transform.position,
                 target,
                 ref _transitVel,
-                _TransitionTime);
+                TransitionTime);
 
         transform.LookAt(_PlayerTarget.transform.position + Vector3.up* 2.0f);
     }
