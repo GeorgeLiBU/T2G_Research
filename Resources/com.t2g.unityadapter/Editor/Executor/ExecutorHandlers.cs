@@ -133,19 +133,20 @@ namespace T2G.UnityAdapter
                 }
             }
 
-            var args = EditorPrefs.GetString(Defs.k_Pending_Arguments, null);
-            string[] argsArr = args.Split(",");
-            List<string> argList = new List<string>(argsArr);
-
             string prefabPath = Path.Combine("Assets", "Prefabs", prefabName, $"{prefabName}.prefab");
-            GameObject prefab = AssetDatabase.LoadAssetAtPath(prefabPath, typeof(UnityEngine.Object)) as GameObject;
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             if (prefab != null)
             {
+                var args = EditorPrefs.GetString(Defs.k_Pending_Arguments, null);
+                string[] argsArr = args.Split(", ");
+                List<string> argList = new List<string>(argsArr);
                 GameObject newObj = GameObject.Instantiate(prefab, Vector3.zero, Quaternion.identity);
                 newObj.name = Executor.GetPropertyValue("-OBJECT", ref argList);
                 var position = Executor.GetPropertyValue("-POSITION", ref argList);
                 var rotation = Executor.GetPropertyValue("-ROTATION", ref argList);
                 var scale = Executor.GetPropertyValue("-SCALE", ref argList);
+
+                Debug.LogError($"name={newObj.name}, position={position}, rotation={rotation}, scale={scale}");
                 if (!string.IsNullOrEmpty(position))
                 {
                     float[] float3 = Executor.ParseFloat3(position);
@@ -160,6 +161,7 @@ namespace T2G.UnityAdapter
                 if (!string.IsNullOrEmpty(scale))
                 {
                     float[] float3 = Executor.ParseFloat3(scale);
+                    Debug.LogError($"Scale3=({float3[0]}, {float3[1]}, {float3[2]})");
                     newObj.transform.localScale = new Vector3(float3[0], float3[1], float3[2]);
                 }
                 s_currentObject = newObj;
@@ -232,7 +234,7 @@ namespace T2G.UnityAdapter
                 string argsString = argList[0];
                 for(int i = 1; i < argList.Count; ++i)
                 {
-                    argsString += $",{argList[i]}";
+                    argsString += $", {argList[i]}";
                 }
                 EditorPrefs.SetString(Defs.k_Pending_NewPrefabObject, prefabName);
                 EditorPrefs.SetString(Defs.k_Pending_Arguments, argsString);

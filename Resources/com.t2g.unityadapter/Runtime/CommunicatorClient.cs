@@ -21,6 +21,7 @@ namespace T2G.UnityAdapter
         public Action OnFailedToConnectToServer;
         public Action BeforeDiscinnectFromServer;
         public Action OnDisconnectedFromServer;
+        public bool Silent { get; private set; } = false;
 
         float _connectTimer = 0.0f;
         readonly float k_connectTimeout = 3.0f;
@@ -49,12 +50,14 @@ namespace T2G.UnityAdapter
             }
         }
 
-        public void StartClient(float timeout = 0.0f)
+        public void StartClient(float timeout = 0.0f, bool silent = false)
         {
             if (ClientState != eClientState.Disconnected)
             {
                 return;
             }
+
+            Silent = silent;
 
             if (IsActive)
             {
@@ -78,7 +81,10 @@ namespace T2G.UnityAdapter
             _jobHandle.Complete();
             if (ClientState == eClientState.Connected || ClientState == eClientState.Connecting)
             {
-                BeforeDiscinnectFromServer?.Invoke();
+                if (!Silent)
+                {
+                    BeforeDiscinnectFromServer?.Invoke();
+                }
                 _connections[0].Disconnect(_networkDriver);
                 _networkDriver.ScheduleUpdate().Complete();
                 ClientState = eClientState.Disconnected;
@@ -114,7 +120,10 @@ namespace T2G.UnityAdapter
                 {
                     ClientState = eClientState.Disconnected;
                     Dispose();
-                    OnFailedToConnectToServer?.Invoke();
+                    if (!Silent)
+                    {
+                        OnFailedToConnectToServer?.Invoke();
+                    }
                 }
             }
 
@@ -172,13 +181,19 @@ namespace T2G.UnityAdapter
                     else if (command == NetworkEvent.Type.Connect)  //Connected
                     {
                         comm.ClientState = eClientState.Connected;
-                        comm.OnConnectedToServer?.Invoke();
+                        if (!comm.Silent)
+                        {
+                            comm.OnConnectedToServer?.Invoke();
+                        }
                     }
                     else if (command == NetworkEvent.Type.Disconnect) //Disconnected
                     {
                         comm.ClientState = eClientState.Disconnected;
                         comm.Dispose();
-                        comm.OnDisconnectedFromServer?.Invoke();
+                        if (!comm.Silent)
+                        {
+                            comm.OnDisconnectedFromServer?.Invoke();
+                        }
                     }
                 }
             }

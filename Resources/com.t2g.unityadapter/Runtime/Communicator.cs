@@ -83,19 +83,34 @@ namespace T2G.UnityAdapter
 
         public static void Load()
         {
+#if UNITY_EDITOR
+            UnityEditorPath = UnityEditor.EditorPrefs.GetString(Defs.k_UnityEditorPath, string.Empty);
+            RecoursePath = UnityEditor.EditorPrefs.GetString(Defs.k_ResourcePath, string.Empty);
+            User = UnityEditor.EditorPrefs.GetString(Defs.k_UserName, "You");
+            Assistant = UnityEditor.EditorPrefs.GetString(Defs.k_AssistantName, "Assistant");
+            Loaded = true;
+#else
             UnityEditorPath = PlayerPrefs.GetString(Defs.k_UnityEditorPath, string.Empty);
             RecoursePath = PlayerPrefs.GetString(Defs.k_ResourcePath, string.Empty);
             User = PlayerPrefs.GetString(Defs.k_UserName, "You");
             Assistant = PlayerPrefs.GetString(Defs.k_AssistantName, "Assistant");
             Loaded = true;
+#endif
         }
 
         public static void Save()
         {
+#if UNITY_EDITOR
+            UnityEditor.EditorPrefs.SetString(Defs.k_UnityEditorPath, UnityEditorPath);
+            UnityEditor.EditorPrefs.SetString(Defs.k_ResourcePath, RecoursePath);
+            UnityEditor.EditorPrefs.SetString(Defs.k_UserName, User);
+            UnityEditor.EditorPrefs.SetString(Defs.k_AssistantName, Assistant);
+#else
             PlayerPrefs.SetString(Defs.k_UnityEditorPath, UnityEditorPath);
             PlayerPrefs.SetString(Defs.k_ResourcePath, RecoursePath);
             PlayerPrefs.SetString(Defs.k_UserName, User);
             PlayerPrefs.SetString(Defs.k_AssistantName, Assistant);
+#endif
         }
     }
 

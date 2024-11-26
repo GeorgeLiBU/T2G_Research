@@ -160,8 +160,7 @@ public class SimAssistant : MonoBehaviour
         bool retVal = true;
         string[] args = new string[1] { ((int)timeout).ToString() };
         ConsoleController.Instance.WaitForConnect = true;
-        //CommandSystem.Instance.ExecuteCommand((succeeded, sender, message) => {  }, "Connect", args);
-        CommunicatorClient.Instance.StartClient();
+        CommunicatorClient.Instance.StartClient(0.0f, true);
         float timer = 0.0f;
         while (!CommunicatorClient.Instance.IsConnected && timer < timeout)
         {
@@ -223,7 +222,7 @@ public class SimAssistant : MonoBehaviour
         float connectionTimeout = timeout;
         while (!CommunicatorClient.Instance.IsConnected)
         {
-            CommunicatorClient.Instance.StartClient(1.0f);
+            CommunicatorClient.Instance.StartClient(0.0f, true);
             await Task.Delay(1000);
             timer += 1.0f;
             if(timer >= connectionTimeout)
@@ -249,7 +248,7 @@ public class SimAssistant : MonoBehaviour
                 timer += 0.1f;
                 if (!CommunicatorClient.Instance.IsConnected)
                 {
-                    CommunicatorClient.Instance.StartClient();  //try reconnecting silently
+                    CommunicatorClient.Instance.StartClient(0.0f, true); 
                 }
                 if (timer >= timeout)
                 {
