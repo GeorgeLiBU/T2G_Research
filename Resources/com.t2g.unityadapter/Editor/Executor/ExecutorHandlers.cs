@@ -146,7 +146,6 @@ namespace T2G.UnityAdapter
                 var rotation = Executor.GetPropertyValue("-ROTATION", ref argList);
                 var scale = Executor.GetPropertyValue("-SCALE", ref argList);
 
-                Debug.LogError($"name={newObj.name}, position={position}, rotation={rotation}, scale={scale}");
                 if (!string.IsNullOrEmpty(position))
                 {
                     float[] float3 = Executor.ParseFloat3(position);
@@ -161,7 +160,6 @@ namespace T2G.UnityAdapter
                 if (!string.IsNullOrEmpty(scale))
                 {
                     float[] float3 = Executor.ParseFloat3(scale);
-                    Debug.LogError($"Scale3=({float3[0]}, {float3[1]}, {float3[2]})");
                     newObj.transform.localScale = new Vector3(float3[0], float3[1], float3[2]);
                 }
                 s_currentObject = newObj;
