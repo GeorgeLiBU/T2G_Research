@@ -162,6 +162,7 @@ namespace T2G.UnityAdapter
                     float[] float3 = Executor.ParseFloat3(scale);
                     newObj.transform.localScale = new Vector3(float3[0], float3[1], float3[2]);
                 }
+                newObj.SetActive(true);
                 s_currentObject = newObj;
                 Executor.RespondCompletion(true, $"{prefabName} object was created!");
             }
@@ -170,7 +171,6 @@ namespace T2G.UnityAdapter
                 Executor.RespondCompletion(false, $"Missing prefab '{prefabName}' to create the object!");
             }
         }
-
 
         public override void HandleExecution(Executor.Instruction instruction)
         {
