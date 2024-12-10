@@ -7,6 +7,8 @@ public class CmdInitProject : Command
 {
     public static readonly string CommandKey = "InitProject";
     static readonly string k_T2g_UnityAdapter = "com.t2g.unityadapter";
+    static readonly string k_unity_ugui = "com.unity.ugui";
+    static readonly string k_unity_ugui_version = "2.0.0";
 
     private string _projectPathName;
 
@@ -67,15 +69,22 @@ public class CmdInitProject : Command
                 {
                     dependencies.DependencyMap.Add(k_T2g_UnityAdapter, packagePath);
                 }
-                json = JsonConvert.SerializeObject(dependencies, Formatting.Indented);
-                File.WriteAllText(manifestFilePath, json);
-                OnExecutionCompleted?.Invoke(true, ConsoleController.eSender.System, $"Succeeded!");
-                result = true;
             }
             else
             {
                 OnExecutionCompleted?.Invoke(true, ConsoleController.eSender.Error, $"Failed! T2G.UnityAdapter is missing.");
+                return result;
             }
+
+            if (!dependencies.DependencyMap.ContainsKey(k_unity_ugui))
+            {
+                dependencies.DependencyMap.Add(k_unity_ugui, k_unity_ugui_version);
+            }
+
+            json = JsonConvert.SerializeObject(dependencies, Formatting.Indented);
+            File.WriteAllText(manifestFilePath, json);
+            OnExecutionCompleted?.Invoke(true, ConsoleController.eSender.System, $"Succeeded!");
+            result = true;
         }
         else
         {

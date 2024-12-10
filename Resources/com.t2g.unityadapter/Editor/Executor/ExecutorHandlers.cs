@@ -29,7 +29,8 @@ namespace T2G.UnityAdapter
     {
         public override void HandleExecution(Executor.Instruction instruction)
         {
-            Action<string, List<string>> setupWorld = (sceneFile, args) => {
+            Action<string, List<string>> setupWorld = (sceneFile, args) =>
+            {
                 for (int i = 1; i < args.Count - 1; i += 2)
                 {
                     if (args[i].CompareTo("-GRAVITY") == 0 && float.TryParse(args[i + 1], out var gravity))
@@ -83,11 +84,12 @@ namespace T2G.UnityAdapter
             {
                 Directory.CreateDirectory(scenesPath);
             }
-            
+
             string sceneFile = Path.Combine(scenesPath, instruction.Arguments[0] + ".unity");
             if (File.Exists(sceneFile))
             {
-                EditorSceneManager.sceneOpened += (scene, mode) => {
+                EditorSceneManager.sceneOpened += (scene, mode) =>
+                {
                     setupWorld(sceneFile, instruction.Arguments);
                     Executor.RespondCompletion(true);
                 };
@@ -128,47 +130,79 @@ namespace T2G.UnityAdapter
                 timer -= 0.1f;
                 if (timer <= 0.0f)
                 {
-                    Debug.LogError("[AddScipt.ProcessPendingInsrtuction] Timeout waiting for client re-connection.");
+                    Debug.LogError("[AddScipt.ProcessPendingInsrtuction] Timeout for client re-connection.");
                     return;
                 }
             }
 
-            string prefabPath = Path.Combine("Assets", "Prefabs", prefabName, $"{prefabName}.prefab");
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            if (prefab != null)
+            //Find the actual path
+            string prefabsDir = Path.Combine(Application.dataPath, "Prefabs");
+            var files = Directory.GetFiles(prefabsDir, "*.prefab", SearchOption.AllDirectories);
+            string prefabPath = string.Empty;
+            foreach (var file in files)
             {
-                var args = EditorPrefs.GetString(Defs.k_Pending_Arguments, null);
-                string[] argsArr = args.Split(", ");
-                List<string> argList = new List<string>(argsArr);
-                GameObject newObj = GameObject.Instantiate(prefab, Vector3.zero, Quaternion.identity);
-                newObj.name = Executor.GetPropertyValue("-OBJECT", ref argList);
-                var position = Executor.GetPropertyValue("-POSITION", ref argList);
-                var rotation = Executor.GetPropertyValue("-ROTATION", ref argList);
-                var scale = Executor.GetPropertyValue("-SCALE", ref argList);
-
-                if (!string.IsNullOrEmpty(position))
+                string fn = Path.GetFileName(file);
+                string prefabFile = prefabName + ".prefab";
+                if (string.Compare(fn, prefabFile) == 0)
                 {
-                    float[] float3 = Executor.ParseFloat3(position);
-                    newObj.transform.position = new Vector3(float3[0], float3[1], float3[2]);
+                    int idx = file.IndexOf("Assets");
+                    if (idx >= 0)
+                    {
+                        prefabPath = file.Substring(idx);
+                    }
+                    break;
                 }
-                if (!string.IsNullOrEmpty(rotation))
-                {
-                    float[] float3 = Executor.ParseFloat3(rotation);
-                    Quaternion q = Quaternion.Euler(float3[0], float3[1], float3[2]);
-                    newObj.transform.rotation = q; 
-                }
-                if (!string.IsNullOrEmpty(scale))
-                {
-                    float[] float3 = Executor.ParseFloat3(scale);
-                    newObj.transform.localScale = new Vector3(float3[0], float3[1], float3[2]);
-                }
-                newObj.SetActive(true);
-                s_currentObject = newObj;
-                Executor.RespondCompletion(true, $"{prefabName} object was created!");
+            }
+            if (string.IsNullOrEmpty(prefabPath))
+            {
+                Executor.RespondCompletion(false, $"Missing prefab '{prefabName}' to create the object!");
             }
             else
             {
-                Executor.RespondCompletion(false, $"Missing prefab '{prefabName}' to create the object!");
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                if (prefab != null)
+                {
+                    var args = EditorPrefs.GetString(Defs.k_Pending_Arguments, null);
+                    string[] argsArr = args.Split(", ");
+                    List<string> argList = new List<string>(argsArr);
+                    GameObject newObj = GameObject.Instantiate(prefab, Vector3.zero, Quaternion.identity);
+                    newObj.name = Executor.GetPropertyValue("-OBJECT", ref argList);
+                    var position = Executor.GetPropertyValue("-POSITION", ref argList);
+                    var rotation = Executor.GetPropertyValue("-ROTATION", ref argList);
+                    var scale = Executor.GetPropertyValue("-SCALE", ref argList);
+
+                    if (!string.IsNullOrEmpty(position))
+                    {
+                        float[] float3 = Executor.ParseFloat3(position);
+                        newObj.transform.position = new Vector3(float3[0], float3[1], float3[2]);
+                    }
+                    if (!string.IsNullOrEmpty(rotation))
+                    {
+                        float[] float3 = Executor.ParseFloat3(rotation);
+                        Quaternion q = Quaternion.Euler(float3[0], float3[1], float3[2]);
+                        newObj.transform.rotation = q;
+                    }
+                    if (!string.IsNullOrEmpty(scale))
+                    {
+                        float[] float3 = Executor.ParseFloat3(scale);
+                        newObj.transform.localScale = new Vector3(float3[0], float3[1], float3[2]);
+                    }
+
+                    var controller = EditorPrefs.GetString(Defs.k_Pending_Controller, null);
+                    if (!string.IsNullOrEmpty(controller))
+                    {
+                        var setValues = EditorPrefs.GetString(Defs.k_Pending_ControllerSetValues, null);
+                        Executor.ParseAndSetValues(newObj, controller, setValues);
+                    }
+
+                    newObj.SetActive(true);
+                    s_currentObject = newObj;
+                    Executor.RespondCompletion(true, $"{prefabName} object was created!");
+                }
+                else
+                {
+                    Executor.RespondCompletion(false, $"Missing prefab '{prefabName}' to create the object!");
+                }
             }
         }
 
@@ -230,13 +264,21 @@ namespace T2G.UnityAdapter
                 List<string> argList = new List<string>(instruction.Arguments);
                 argList.Insert(0, "-OBJECT");
                 string argsString = argList[0];
-                for(int i = 1; i < argList.Count; ++i)
+                for (int i = 1; i < argList.Count; ++i)
                 {
                     argsString += $", {argList[i]}";
                 }
                 EditorPrefs.SetString(Defs.k_Pending_NewPrefabObject, prefabName);
                 EditorPrefs.SetString(Defs.k_Pending_Arguments, argsString);
                 ContentLibrary.ImportPackage(prefabName, ImportPackageCompletedHanddler);
+
+                string controller = Executor.GetPropertyValue(Defs.k_GameDesc_PrefabControllerKey, ref args);
+                if (!string.IsNullOrEmpty(controller))
+                {
+                    string setValues = Executor.GetPropertyValue(Defs.k_GameDesc_PrefabSetValuesKey, ref args);
+                    EditorPrefs.SetString(Defs.k_Pending_Controller, controller);
+                    EditorPrefs.SetString(Defs.k_Pending_ControllerSetValues, setValues);
+                }
             }
         }
 
@@ -259,7 +301,7 @@ namespace T2G.UnityAdapter
             foreach (var executionClass in executionClasses)
             {
                 var attribute = executionClass.GetCustomAttribute<AddAddonAttribute>();
-                var execution = Activator.CreateInstance (executionClass) as AddAddonBase;
+                var execution = Activator.CreateInstance(executionClass) as AddAddonBase;
                 s_addonProcessor.Add(attribute.AddonType, execution);
             }
         }
@@ -267,8 +309,8 @@ namespace T2G.UnityAdapter
         public override void HandleExecution(Executor.Instruction instruction)
         {
             var argList = new List<string>(instruction.Arguments);
-            string worldName = Executor.GetPropertyValue("-WORLD", ref argList, false); 
-            if(!Executor.OpenWorld(worldName))
+            string worldName = Executor.GetPropertyValue("-WORLD", ref argList, false);
+            if (!Executor.OpenWorld(worldName))
             {
                 Executor.RespondCompletion(false);
                 return;
@@ -282,6 +324,64 @@ namespace T2G.UnityAdapter
             {
                 Executor.RespondCompletion(false);
             }
+        }
+    }
+
+    [Execution("IMPORT_PACKAGE")]
+    public class ExecutionImportPackage : ExecutionBase
+    {
+        public override void HandleExecution(Executor.Instruction instruction)
+        {
+            if(!Settings.Loaded)
+            {
+                Settings.Load();
+            }
+
+            var args = instruction.Arguments;
+            var packageName = args[0].Trim('"');
+            string packagePath = Path.Combine(Settings.RecoursePath, "Packages", packageName);
+            AssetDatabase.importPackageCompleted += ImportPackageCompletedHanddler;
+            AssetDatabase.importPackageFailed += ImportPackageFailedHanddler;
+            EditorPrefs.SetString(Defs.k_Pending_ImportPackage, packageName);
+            AssetDatabase.ImportPackage(packagePath, false);
+            AssetDatabase.Refresh();
+        }
+
+        [InitializeOnLoadMethod]
+        static async void ProcessPendingInsrtuction()
+        {
+            var packageName = EditorPrefs.GetString(Defs.k_Pending_ImportPackage, null);
+            if (string.IsNullOrEmpty(packageName))
+            {
+                return;
+            }
+            EditorPrefs.SetString(Defs.k_Pending_ImportPackage, string.Empty);
+            
+            //Wait for re-connection from the client
+            float timer = 300.0f;  //Wait for 5 minutes 
+            while (!CommunicatorServer.Instance.IsConnected)
+            {
+                await Task.Delay(100);
+                timer -= 0.1f;
+                if (timer <= 0.0f)
+                {
+                    Debug.LogError("[ImportPackage.ProcessPendingInsrtuction] Timeout for client re-connection.");
+                    return;
+                }
+            }
+            Executor.RespondCompletion(true, $"Imported {packageName} package with reset!");
+        }
+
+        static void ImportPackageCompletedHanddler(string packageName)
+        {
+            EditorPrefs.SetString(Defs.k_Pending_ImportPackage, string.Empty);
+            Executor.RespondCompletion(true, $"Imported {packageName} package!");
+        }
+
+        static void ImportPackageFailedHanddler(string packageName, string errorMessage)
+        {
+            EditorPrefs.SetString(Defs.k_Pending_ImportPackage, string.Empty);
+            Executor.RespondCompletion(false, $"Failed to import {packageName} package!");
         }
     }
 }

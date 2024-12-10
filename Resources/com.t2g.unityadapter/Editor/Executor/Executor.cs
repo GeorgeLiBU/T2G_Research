@@ -107,6 +107,7 @@ namespace T2G.UnityAdapter
                     Execute(ins);
                 }
                 RespondCompletion(true, "Game generation is completed!");
+                return;
             }
 
             if(_executionPool.ContainsKey(instruction.Command))

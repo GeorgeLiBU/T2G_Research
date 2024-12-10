@@ -35,8 +35,6 @@ namespace T2G.UnityAdapter
             }
         }
 
-
-
         static CommunicatorClient _instance = null;
         public static CommunicatorClient Instance
         {

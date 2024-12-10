@@ -193,7 +193,11 @@ public class SimAssistant : MonoBehaviour
             await OpenProject(gameDesc);
 
             bool connected = await Connect();
-            if (!connected)
+            if (connected)
+            {
+                ConsoleController.Instance.HandleOnConnectedToServer();
+            }
+            else
             {
                 console.WriteConsoleMessage(ConsoleController.eSender.Error, "Connection to the game project has timed out! ");
                 return;
@@ -212,8 +216,12 @@ public class SimAssistant : MonoBehaviour
                 break;
             }
         }
-        ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.Assistant, 
-            errorCode > 0 ? $"Game generation was interrupted. ErrorCode: {errorCode}" : "Game generation completed!");
+
+        if (errorCode > 0)
+        {
+            ConsoleController.Instance.WriteConsoleMessage(ConsoleController.eSender.Assistant,
+            $"Game generation was interrupted. ErrorCode: {errorCode}");
+        }
     }
 
     async Task<int> SendInstruction(string instruction, float timeout = 60.0f)

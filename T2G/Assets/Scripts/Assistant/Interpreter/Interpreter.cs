@@ -97,15 +97,17 @@ public partial class Interpreter
         }
         else if (category.CompareTo(Defs.k_GameDescCategory) == 0)
         {
+            var packages = jsonObj.GetValueOrDefault(Defs.k_GameDesc_PackagesKey, null).AsArray;
+            for(int i = 0; i < packages.Count; ++i)
+            {
+                string packageName = packages[i].ToString();
+                _instructions.Add($"IMPORT_PACKAGE {packageName}");
+            }
+
             JSONNode gameWorlds = jsonObj.GetValueOrDefault(Defs.k_GameDesc_GameWorldsKey, null);
             Interpret(gameWorlds);
         }
 
         return true;
-    }
-
-    public static bool IsNotEmptyString(string strToCheck)
-    {
-        return !(string.IsNullOrWhiteSpace(strToCheck) || string.Compare(strToCheck, "\"\"") == 0);
     }
 }

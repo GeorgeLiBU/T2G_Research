@@ -222,6 +222,14 @@ namespace T2G.UnityAdapter
                         {
                             Executor.SetFieldValue(script, fieldInfo, settingsList[i + 1]);
                         }
+                        else
+                        {
+                            var propertyInfo = type.GetProperty(settingsList[i]);
+                            if(propertyInfo != null)
+                            {
+                                Executor.SetPropertyValue(script, propertyInfo, settingsList[i + 1]);
+                            }
+                        }
                     }
                     Executor.RespondCompletion(true);
                 }

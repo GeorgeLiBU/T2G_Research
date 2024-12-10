@@ -16,6 +16,9 @@ public class Defs
     public static readonly string k_Pending_AddonScript = "PendingAddonScript";
     public static readonly string k_Pending_NewPrefabObject = "NewPrefabObject";
     public static readonly string k_Pending_Arguments = "PendingArguments";
+    public static readonly string k_Pending_ImportPackage = "ImportPackage";
+    public static readonly string k_Pending_Controller = "PendingController";
+    public static readonly string k_Pending_ControllerSetValues = "PendingControllerSetValues";
 
     //GameDesc key names
     public static readonly string k_GameDesc_CategoryKeyName = "Category";
@@ -25,6 +28,9 @@ public class Defs
     public static readonly string k_GameDesc_RotationKey = "Rotation";
     public static readonly string k_GameDesc_ScaleKey = "Scale";
     public static readonly string k_GameDesc_PrefabKey = "Prefab";
+    public static readonly string k_GameDesc_PrefabControllerKey = "Controller";
+    public static readonly string k_GameDesc_PrefabSetValuesKey = "SetControllerValues";
+    public static readonly string k_GameDesc_PackagesKey = "Packages";
     public static readonly string k_GameDesc_AddonsKey = "Addons";
     public static readonly string k_GameDesc_AddonTypeKey = "AddonType";
 
@@ -35,5 +41,5 @@ public class Defs
     public static readonly string k_ObjectAddonCategory = "Addon";
 
     //Instruction commands
-    public static readonly string k_EndOfGameGeneration = "End of game generation.";
+    public static readonly string k_EndOfGameGeneration = "END_OF_GAME_GENERATION";
 }

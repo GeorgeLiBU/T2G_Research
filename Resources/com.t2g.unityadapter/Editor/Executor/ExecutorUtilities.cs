@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor.SceneManagement;
@@ -73,6 +74,139 @@ namespace T2G.UnityAdapter
                 }
             }
             return fValue;
+        }
+
+        public static void ParseAndSetValues(GameObject gameObject, string controller, string valuePairs)
+        {
+            Dictionary<string, string> fieldValues = new Dictionary<string, string>();
+            var setValues = valuePairs.Substring(1, valuePairs.Length - 2).Split("\",\"");
+            for(int i = 0; i < setValues.Length - 1; i+=2)
+            {
+                fieldValues.Add(setValues[i].Trim('"'), setValues[i + 1].Trim('"'));
+            }
+
+            //Set properties
+            var component = gameObject.GetComponent(controller);
+            Type type = component.GetType();
+            var properties = type.GetProperties();
+            for(int i = 0; i < properties.Length; ++i)
+            {
+                var propertyInfo = properties[i];
+                if(fieldValues.ContainsKey(propertyInfo.Name))
+                {
+                    if(propertyInfo.PropertyType == typeof(string))
+                    {
+                        propertyInfo.SetValue(component, fieldValues[propertyInfo.Name]);
+                    }
+                    else if (propertyInfo.PropertyType == typeof(int))
+                    {
+                        propertyInfo.SetValue(component, int.Parse(fieldValues[propertyInfo.Name]));
+                    }
+                    else if (propertyInfo.PropertyType == typeof(float))
+                    {
+                        propertyInfo.SetValue(component, float.Parse(fieldValues[propertyInfo.Name]));
+                    }
+                    else if (propertyInfo.PropertyType == typeof(bool))
+                    {
+                        propertyInfo.SetValue(component, bool.Parse(fieldValues[propertyInfo.Name]));
+                    }
+                    else if (propertyInfo.PropertyType == typeof(Color))
+                    {
+                        var valuesStr = fieldValues[propertyInfo.Name];
+                        valuesStr = valuesStr.Substring(1, valuesStr.Length - 2);
+                        var values = valuesStr.Split(",");
+                        Color color = new Color(float.Parse(values[0]), 
+                            float.Parse(values[1]), float.Parse(values[2]), float.Parse(values[3]));
+                        propertyInfo.SetValue(component, color);
+                    }
+                    else if (propertyInfo.PropertyType == typeof(Vector3))
+                    {
+                        var valuesStr = fieldValues[propertyInfo.Name];
+                        valuesStr = valuesStr.Substring(1, valuesStr.Length - 2);
+                        var values = valuesStr.Split(",");
+                        Vector3 vec3 = new Vector3(float.Parse(values[0]), 
+                            float.Parse(values[1]), float.Parse(values[2]));
+                        propertyInfo.SetValue(component, vec3);
+                    }
+                    else if (propertyInfo.PropertyType == typeof(Vector2))
+                    {
+                        var valuesStr = fieldValues[propertyInfo.Name];
+                        valuesStr = valuesStr.Substring(1, valuesStr.Length - 2);
+                        var values = valuesStr.Split(",");
+                        Vector2 vec2 = new Vector2(float.Parse(values[0]), float.Parse(values[1]));
+                        propertyInfo.SetValue(component, vec2);
+                    }
+                    else if (propertyInfo.PropertyType == typeof(Vector4))
+                    {
+                        var valuesStr = fieldValues[propertyInfo.Name];
+                        valuesStr = valuesStr.Substring(1, valuesStr.Length - 2);
+                        var values = valuesStr.Split(",");
+                        Vector4 vec4 = new Vector4(float.Parse(values[0]), float.Parse(values[1]),
+                            float.Parse(values[2]), float.Parse(values[3]));
+                        propertyInfo.SetValue(component, vec4);
+                    }
+                }
+            }
+
+            var fields = type.GetFields();
+            for (int i = 0; i < fields.Length; ++i)
+            {
+                var fieldInfo = fields[i];
+                if (fieldValues.ContainsKey(fieldInfo.Name))
+                {
+                    if (fieldInfo.FieldType == typeof(string))
+                    {
+                        fieldInfo.SetValue(component, fieldValues[fieldInfo.Name]);
+                    }
+                    else if (fieldInfo.FieldType == typeof(int))
+                    {
+                        fieldInfo.SetValue(component, int.Parse(fieldValues[fieldInfo.Name]));
+                    }
+                    else if (fieldInfo.FieldType == typeof(float))
+                    {
+                        fieldInfo.SetValue(component, float.Parse(fieldValues[fieldInfo.Name]));
+                    }
+                    else if (fieldInfo.FieldType == typeof(bool))
+                    {
+                        fieldInfo.SetValue(component, bool.Parse(fieldValues[fieldInfo.Name]));
+                    }
+                    else if (fieldInfo.FieldType == typeof(Color))
+                    {
+                        var valuesStr = fieldValues[fieldInfo.Name];
+                        valuesStr = valuesStr.Substring(1, valuesStr.Length - 2);
+                        var values = valuesStr.Split(",");
+                        Color color = new Color(float.Parse(values[0]),
+                            float.Parse(values[1]), float.Parse(values[2]), float.Parse(values[3]));
+                        fieldInfo.SetValue(component, color);
+                    }
+                    else if (fieldInfo.FieldType == typeof(Vector3))
+                    {
+                        var valuesStr = fieldValues[fieldInfo.Name];
+                        valuesStr = valuesStr.Substring(1, valuesStr.Length - 2);
+                        var values = valuesStr.Split(",");
+                        Vector3 vec3 = new Vector3(float.Parse(values[0]),
+                            float.Parse(values[1]), float.Parse(values[2]));
+                        fieldInfo.SetValue(component, vec3);
+                    }
+                    else if (fieldInfo.FieldType == typeof(Vector2))
+                    {
+                        var valuesStr = fieldValues[fieldInfo.Name];
+                        valuesStr = valuesStr.Substring(1, valuesStr.Length - 2);
+                        var values = valuesStr.Split(",");
+                        Vector2 vec2 = new Vector2(float.Parse(values[0]), float.Parse(values[1]));
+                        fieldInfo.SetValue(component, vec2);
+                    }
+                    else if (fieldInfo.FieldType == typeof(Vector4))
+                    {
+                        var valuesStr = fieldValues[fieldInfo.Name];
+                        valuesStr = valuesStr.Substring(1, valuesStr.Length - 2);
+                        var values = valuesStr.Split(",");
+                        Vector4 vec4 = new Vector4(float.Parse(values[0]), float.Parse(values[1]),
+                            float.Parse(values[2]), float.Parse(values[3]));
+                        fieldInfo.SetValue(component, vec4);
+                    }
+                }
+            }
         }
 
         public static string GetPropertyValue(string propertyName, ref List<string> argList, bool removeProperty = true, int startIndex = 0)
@@ -189,6 +323,50 @@ namespace T2G.UnityAdapter
                 var float4 = Executor.ParseFloat4(value);
                 Color color = new Color(float4[0], float4[1], float4[2], float4[3]);
                 fieldInfo.SetValue(component, color);
+            }
+        }
+        public static void SetPropertyValue(object component, System.Reflection.PropertyInfo propertyInfo, string value)
+        {
+            value = value.Trim('"');
+            if (propertyInfo.PropertyType == typeof(string))
+            {
+                propertyInfo.SetValue(component, value);
+            }
+            else if (propertyInfo.PropertyType == typeof(float))
+            {
+                propertyInfo.SetValue(component, float.Parse(value));
+            }
+            else if (propertyInfo.PropertyType == typeof(int))
+            {
+                propertyInfo.SetValue(component, int.Parse(value));
+            }
+            else if (propertyInfo.PropertyType == typeof(bool))
+            {
+                propertyInfo.SetValue(component, bool.Parse(value));
+            }
+            else if (propertyInfo.PropertyType == typeof(Vector2))
+            {
+                var float2 = Executor.ParseFloat2(value);
+                Vector2 vector2 = new Vector2(float2[0], float2[1]);
+                propertyInfo.SetValue(component, vector2);
+            }
+            else if (propertyInfo.PropertyType == typeof(Vector3))
+            {
+                var float3 = Executor.ParseFloat3(value);
+                Vector3 vector3 = new Vector3(float3[0], float3[1], float3[2]);
+                propertyInfo.SetValue(component, vector3);
+            }
+            else if (propertyInfo.PropertyType == typeof(Vector4))
+            {
+                var float4 = Executor.ParseFloat4(value);
+                Vector3 vector4 = new Vector4(float4[0], float4[1], float4[2], float4[3]);
+                propertyInfo.SetValue(component, vector4);
+            }
+            else if (propertyInfo.PropertyType == typeof(Color))
+            {
+                var float4 = Executor.ParseFloat4(value);
+                Color color = new Color(float4[0], float4[1], float4[2], float4[3]);
+                propertyInfo.SetValue(component, color);
             }
         }
 

@@ -374,7 +374,7 @@ public class ConsoleController : MonoBehaviour
 
     }
 
-    void HandleOnConnectedToServer()
+    public void HandleOnConnectedToServer()
     {
         WriteConsoleMessage(eSender.System, "Connected to the project!");
 
